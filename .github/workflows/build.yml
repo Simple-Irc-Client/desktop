@@ -36,6 +36,7 @@ jobs:
       - name: build core
         run: |
           cd core
+          npm ci
           npm run build
           cp dist/* ../src
           cd ..
@@ -43,6 +44,7 @@ jobs:
       - name: build network
         run: |
           cd network
+          npm ci
           npm run build
           mv irc-network.js ../src
           cd ..
