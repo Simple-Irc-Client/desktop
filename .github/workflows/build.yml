@@ -11,8 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          path: main
 
       - uses: actions/setup-node@master
         with:
