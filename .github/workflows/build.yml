@@ -1,0 +1,35 @@
+name: Build
+on: [push, pull_request]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: 14
+      - name: install dependencies
+        run: npm install
+      - name: build core
+        run: |
+          git clone git@github.com:Simple-Irc-Client/core.git
+          cd core
+          npm run build
+          cp dist/* ../src
+      - name: build network
+        run: |
+          git clone git@github.com:Simple-Irc-Client/network.git
+          cd network
+          npm run build
+          mv irc-network.js ../src
+      - name: build electron
+        run: npm run make
