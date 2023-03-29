@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: main
 
       - uses: actions/setup-node@master
         with:
@@ -23,15 +25,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/core
-          token: ${{ secrets.GH_TOKEN }}
-          path: core
+          token: ${{ secrets.SIC_PAT }}
 
       - name: clone network
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/network
-          token: ${{ secrets.GH_TOKEN }}
-          path: network
+          token: ${{ secrets.SIC_PAT }}
 
       - name: build core
         run: |
