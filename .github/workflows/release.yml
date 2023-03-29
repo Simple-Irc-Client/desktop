@@ -13,7 +13,8 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - name: build
-        uses: ./.github/workflows/build.yml
+      - uses: actions/checkout@v3
+      - uses: ./.github/workflows/build.yml
+
       - name: publish
         run: npm run publish
