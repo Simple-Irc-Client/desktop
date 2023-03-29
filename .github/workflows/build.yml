@@ -16,27 +16,34 @@ jobs:
           node-version: 14
       - name: install dependencies
         run: npm install
-      - name: build core
+
+      - name: clone core
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/core
           token: ${{ secrets.GH_TOKEN }}
           path: core
-        run: |
-          cd core
-          npm run build
-          cp dist/* ../src
-          cd ..
-      - name: build network
+
+      - name: clone network
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/network
           token: ${{ secrets.GH_TOKEN }}
           path: network
+
+      - name: build core
+        run: |
+          cd core
+          npm run build
+          cp dist/* ../src
+          cd ..
+
+      - name: build network
         run: |
           cd network
           npm run build
           mv irc-network.js ../src
           cd ..
+
       - name: build electron
         run: npm run make
