@@ -1,9 +1,6 @@
 name: Build
 on: [push, pull_request]
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -13,23 +10,31 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@master
         with:
           node-version: 14
       - name: install dependencies
         run: npm install
       - name: build core
+        with:
+          repository: Simple-Irc-Client/core
+          token: ${{ secrets.GH_TOKEN }}
+          path: core
         run: |
-          git clone git@github.com:Simple-Irc-Client/core.git
           cd core
           npm run build
           cp dist/* ../src
+          cd ..
       - name: build network
+        with:
+          repository: Simple-Irc-Client/network
+          token: ${{ secrets.GH_TOKEN }}
+          path: network
         run: |
-          git clone git@github.com:Simple-Irc-Client/network.git
           cd network
           npm run build
           mv irc-network.js ../src
+          cd ..
       - name: build electron
         run: npm run make
