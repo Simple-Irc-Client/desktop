@@ -38,7 +38,7 @@ jobs:
           cd core
           npm ci
           npm run build
-          cp dist/* ../src
+          cp -r dist/* ../src
           cd ..
 
       - name: build network
