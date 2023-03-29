@@ -24,12 +24,14 @@ jobs:
         with:
           repository: Simple-Irc-Client/core
           token: ${{ secrets.SIC_PAT }}
+          path: core
 
       - name: clone network
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/network
           token: ${{ secrets.SIC_PAT }}
+          path: network
 
       - name: build core
         run: |
