@@ -17,6 +17,7 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: build core
+        uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/core
           token: ${{ secrets.GH_TOKEN }}
@@ -27,6 +28,7 @@ jobs:
           cp dist/* ../src
           cd ..
       - name: build network
+        uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/network
           token: ${{ secrets.GH_TOKEN }}
