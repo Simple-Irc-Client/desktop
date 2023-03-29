@@ -2,52 +2,14 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  release:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@master
-        with:
-          node-version: 16
-
-      - name: install dependencies
-        run: npm install
-
-      - name: clone core
-        uses: actions/checkout@v3
-        with:
-          repository: Simple-Irc-Client/core
-          token: ${{ secrets.SIC_PAT }}
-          path: core
-
-      - name: clone network
-        uses: actions/checkout@v3
-        with:
-          repository: Simple-Irc-Client/network
-          token: ${{ secrets.SIC_PAT }}
-          path: network
-
-      - name: build core
-        run: |
-          cd core
-          npm ci
-          npm run build
-          cp -r dist/* ../src
-          cd ..
-
-      - name: build network
-        run: |
-          cd network
-          npm ci
-          npm run build
-          mv irc-network.js ../src
-          cd ..
-
-      - name: build electron
-        run: npm run make
+      - name: build
+        uses: ./.github/workflows/build.yml
+        secrets: inherit

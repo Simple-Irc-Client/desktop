@@ -13,11 +13,8 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@master
-        with:
-          node-version: 16
-      - name: install dependencies
-        run: npm install
+      - name: build
+        uses: ./.github/workflows/build.yml
+        secrets: inherit
       - name: publish
         run: npm run publish
