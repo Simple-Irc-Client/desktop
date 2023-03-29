@@ -5,16 +5,9 @@ on:
       - created
 
 jobs:
+  build:
+    - uses: ./.github/workflows/build.yml
+
   release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/workflows/build.yml
-
-      - name: publish
-        run: npm run publish
+    - name: publish
+      run: npm run publish

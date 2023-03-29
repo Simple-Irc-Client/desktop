@@ -1,14 +1,22 @@
 name: Build electron package
 
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
+      - uses: actions/checkout@v3
+
       - uses: actions/setup-node@master
         with:
           node-version: 16
@@ -48,3 +56,8 @@ jobs:
 
       - name: build electron
         run: npm run make
+
+      # - name: sign exe
+      #   if: matrix.platform == 'windows-latest'
+      #   run: |
+      #     C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 MyFile.exe
