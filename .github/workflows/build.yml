@@ -5,6 +5,11 @@ on:
     secrets:
       SIC_PAT:
         required: true
+    inputs:
+      publish:
+        default: false
+        required: false
+        type: boolean
 
 jobs:
   build:
@@ -61,3 +66,7 @@ jobs:
       #   if: matrix.platform == 'windows-latest'
       #   run: |
       #     C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 MyFile.exe
+
+      - name: publish
+        if: ${{ inputs.publish }} 
+        run: npm run publish

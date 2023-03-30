@@ -9,10 +9,5 @@ jobs:
     uses: ./.github/workflows/build.yml
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
-
-  release:
-    runs-on: ubuntu-latest
-    needs: [Build]
-    steps:
-      - name: publish
-        run: npm run publish
+    inputs:
+      publish: true
