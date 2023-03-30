@@ -1,0 +1,6 @@
+name: Push/PR
+on: [push, pull_request]
+
+jobs:
+  call-build:
+    uses: ./.github/workflows/build.yml
