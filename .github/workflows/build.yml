@@ -2,6 +2,6 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  build:
-    steps:
-      - uses: ./.github/workflows/build.yml
+  call-build:
+    uses: ./.github/workflows/build.yml
+    secrets: inherit

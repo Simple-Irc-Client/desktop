@@ -5,12 +5,11 @@ on:
       - created
 
 jobs:
-  build:
-    steps:
-      - uses: ./.github/workflows/build.yml
-        secrets: inherit
+  call-build:
+    uses: ./.github/workflows/build.yml
 
   release:
+    runs-on: ubuntu-latest
     steps:
       - name: publish
         run: npm run publish
