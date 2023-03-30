@@ -7,7 +7,7 @@ on:
 jobs:
   call-build:
     uses: ./.github/workflows/build.yml
+    with:
+      publish: true
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
-    inputs:
-      publish: true
