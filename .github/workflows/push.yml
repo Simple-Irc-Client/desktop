@@ -4,3 +4,5 @@ on: [push, pull_request]
 jobs:
   call-build:
     uses: ./.github/workflows/build.yml
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
