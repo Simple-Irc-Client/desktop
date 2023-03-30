@@ -50,6 +50,7 @@ jobs:
           npm run build
           cp -r dist/* ../src
           cd ..
+          rm -r core
 
       - name: build network
         run: |
@@ -58,6 +59,7 @@ jobs:
           npm run build
           mv irc-network.js ../src
           cd ..
+          rm -r network
 
       - name: build electron
         run: npm run make
@@ -68,5 +70,5 @@ jobs:
       #     C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 MyFile.exe
 
       - name: publish
-        if: ${{ inputs.publish }} 
+        if: ${{ inputs.publish }}
         run: npm run publish
