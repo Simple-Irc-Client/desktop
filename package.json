@@ -28,6 +28,7 @@
     "@electron-forge/maker-zip": "^6.1.0",
     "@electron-forge/publisher-github": "^6.1.0",
     "electron": "23.2.0",
+    "electron-log": "^4.4.8",
     "update-electron-app": "^2.0.1"
   }
 }

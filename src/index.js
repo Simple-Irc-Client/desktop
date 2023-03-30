@@ -14,6 +14,7 @@ const createWindow = () => {
     title: "Simple Irc Client",
     icon: path.join(__dirname, "icons", "icon.png"),
     webPreferences: {
+      nodeIntegration: true,
       preload: path.join(__dirname, "irc-network.js"), // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
     },
   });
