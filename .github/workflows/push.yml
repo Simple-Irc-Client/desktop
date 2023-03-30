@@ -1,5 +1,5 @@
-name: Push/PR
-on: [push, pull_request]
+name: PR
+on: [pull_request]
 
 jobs:
   call-build:
