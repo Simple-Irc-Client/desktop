@@ -6,8 +6,11 @@ on:
 
 jobs:
   build:
-    - uses: ./.github/workflows/build.yml
+    steps:
+      - uses: ./.github/workflows/build.yml
+        secrets: inherit
 
   release:
-    - name: publish
-      run: npm run publish
+    steps:
+      - name: publish
+        run: npm run publish
