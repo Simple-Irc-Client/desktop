@@ -1,5 +1,11 @@
 name: Build
 
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
