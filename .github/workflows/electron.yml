@@ -1,10 +1,4 @@
-name: Build electron package
-
-on:
-  workflow_call:
-    secrets:
-      SIC_PAT:
-        required: true
+name: Build
 
 jobs:
   build:
