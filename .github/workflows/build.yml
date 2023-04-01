@@ -11,6 +11,9 @@ on:
         required: false
         type: boolean
 
+env:
+  GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
