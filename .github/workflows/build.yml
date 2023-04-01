@@ -65,10 +65,10 @@ jobs:
       - name: build electron
         run: npm run make
 
-      # - name: sign exe
-      #   if: matrix.platform == 'windows-latest'
-      #   run: |
-      #     C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 MyFile.exe
+      - name: sign exe
+        if: matrix.platform == 'windows-latest'
+        run: |
+          cd C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x64/signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 out\make\squirrel.windows\x64\sic-desktop*exe
 
       - name: publish
         if: ${{ inputs.publish }}
