@@ -65,11 +65,6 @@ jobs:
       - name: build electron
         run: npm run make
 
-      - name: sign exe
-        if: ${{ matrix.os == 'windows' }}
-        run: |
-          C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe sign /a /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 out\make\squirrel.windows\x64\sic-desktop*exe
-
       - name: publish
         if: ${{ inputs.publish }}
         run: npm run publish
