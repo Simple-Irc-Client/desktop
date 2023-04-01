@@ -20,7 +20,6 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
-        iconUrl: 'https://simpleircclient.com/favicon.ico',
         setupIcon: "./src/icons/app_icon.ico",
       },
     },
