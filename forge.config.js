@@ -1,7 +1,7 @@
 module.exports = {
   packagerConfig: {
     ignore: [
-      ".github",
+      "\\.github",
       "core",
       "network",
       ".gitignore",

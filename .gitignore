@@ -94,3 +94,9 @@ out/
 # SIC
 core
 network
+
+src/assets
+src/favicon.ico
+src/index.html
+src/irc-network.js
+src/logo.svg

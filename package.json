@@ -11,6 +11,10 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Simple-Irc-Client/desktop.git"
+  },
   "keywords": [],
   "author": {
     "name": "Piotr Luczko",
@@ -18,7 +22,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.1.0",
@@ -27,8 +32,6 @@
     "@electron-forge/maker-squirrel": "^6.1.0",
     "@electron-forge/maker-zip": "^6.1.0",
     "@electron-forge/publisher-github": "^6.1.0",
-    "electron": "23.2.0",
-    "electron-log": "^4.4.8",
-    "update-electron-app": "^2.0.1"
+    "electron": "23.2.0"
   }
 }

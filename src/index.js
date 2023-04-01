@@ -55,4 +55,4 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
-require("./update.js");
+require("update-electron-app")();
