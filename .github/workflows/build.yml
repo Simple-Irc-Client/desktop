@@ -50,7 +50,6 @@ jobs:
           npm run build
           cp -r dist/* ../src
           cd ..
-          rm -rf ./core
 
       - name: build network
         run: |
@@ -59,7 +58,6 @@ jobs:
           npm run build
           mv irc-network.js ../src
           cd ..
-          rm -rf ./network
 
       - name: build electron
         run: npm run make
