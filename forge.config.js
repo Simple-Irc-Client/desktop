@@ -1,5 +1,9 @@
+const path = require('path');
+const fs = require('fs');
+
 module.exports = {
   packagerConfig: {
+    icon: './src/icons/app_icon',
     ignore: [
       "\\.github",
       "core",
@@ -16,6 +20,7 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
+        iconUrl: 'https://simpleircclient.com/favicon.ico',
         setupIcon: "./src/icons/app_icon.ico",
       },
     },
@@ -47,4 +52,9 @@ module.exports = {
       },
     },
   ],
+  hooks: {
+    packageAfterCopy: async (config, buildPath, electronVersion, platform, arch) => {
+      fs.cpSync("./src/irc-network.js", `${buildPath}/src/irc-network.js`);
+    }
+  }
 };
