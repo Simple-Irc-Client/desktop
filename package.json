@@ -1,6 +1,6 @@
 {
-  "name": "sic-desktop",
-  "productName": "sic-desktop",
+  "name": "simple-irc-client",
+  "productName": "Simple Irc Client",
   "version": "0.1.0",
   "description": "Simple Irc Client",
   "main": "src/index.js",
