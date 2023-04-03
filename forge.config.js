@@ -3,6 +3,7 @@ const fs = require('fs');
 
 module.exports = {
   packagerConfig: {
+    executableName: "Simple Irc Client",
     icon: './src/icons/app_icon',
     ignore: [
       "\\.github",
@@ -20,8 +21,6 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
-        id: "simple-irc-client",
-        name: "Simple Irc Client",
         setupIcon: "./src/icons/app_icon.ico",
       },
     },
