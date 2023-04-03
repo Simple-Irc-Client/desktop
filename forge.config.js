@@ -14,12 +14,18 @@ module.exports = {
       "local-remove.sh",
       "README.md",
     ],
+    "win32metadata":{
+      "ProductName": "Simple Irc Client",
+      "CompanyName": "Simple Irc Client",
+    }
   },
   rebuildConfig: {},
   makers: [
     {
       name: "@electron-forge/maker-squirrel",
       config: {
+        // https://github.com/electron/forge/blob/main/packages/maker/squirrel/src/MakerSquirrel.ts
+        iconUrl: 'https://simpleircclient.com/favicon.ico',
         setupIcon: "./src/icons/app_icon.ico",
       },
     },
@@ -27,12 +33,13 @@ module.exports = {
       name: "@electron-forge/maker-deb",
       config: {
         options: {
+          // https://github.com/electron/forge/blob/main/packages/maker/deb/src/Config.ts
           name: "simple-irc-client",
           icon: "./src/icons/app_icon.png",
           homepage: "https://simpleircclient.com",
           categories: ["Network"],
-          description: "Cross platform simple IRC client",
-          productDescription: "Cross platform simple IRC client",
+          description: "Cross platform Simple Irc Client",
+          productDescription: "Cross platform Simple Irc Client",
           productName: "Simple Irc Client",
           section: "comm",
           maintainer: "Simple Irc Client Team",
@@ -43,12 +50,13 @@ module.exports = {
       name: "@electron-forge/maker-rpm",
       config: {
         options: {
+          // https://github.com/electron/forge/blob/main/packages/maker/rpm/src/Config.ts
           name: "simple-irc-client",
           icon: "./src/icons/app_icon.png",
           homepage: "https://simpleircclient.com",
           categories: ["Network"],
-          description: "Cross platform simple IRC client",
-          productDescription: "Cross platform simple IRC client",
+          description: "Cross platform Simple Irc Client",
+          productDescription: "Cross platform Simple Irc Client",
           productName: "Simple Irc Client",
         },
       },
