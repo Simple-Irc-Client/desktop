@@ -3,7 +3,6 @@ const fs = require('fs');
 
 module.exports = {
   packagerConfig: {
-    executableName: "Simple Irc Client",
     icon: './src/icons/app_icon',
     ignore: [
       "\\.github",
