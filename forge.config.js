@@ -20,6 +20,7 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
+        name: "Simple Irc Client",
         setupIcon: "./src/icons/app_icon.ico",
       },
     },
@@ -27,7 +28,15 @@ module.exports = {
       name: "@electron-forge/maker-deb",
       config: {
         options: {
+          name: "simple-irc-client",
           icon: "./src/icons/app_icon.png",
+          homepage: "https://simpleircclient.com",
+          categories: "Network",
+          description: "Cross platform simple IRC client",
+          productDescription: "Cross platform simple IRC client",
+          productName: "Simple Irc Client",
+          section: "comm",
+          maintainer: "Simple Irc Client Team",
         },
       },
     },
@@ -35,7 +44,14 @@ module.exports = {
       name: "@electron-forge/maker-rpm",
       config: {
         options: {
+          name: "simple-irc-client",
           icon: "./src/icons/app_icon.png",
+          homepage: "https://simpleircclient.com",
+          categories: "Utility",
+          description: "Cross platform simple IRC client",
+          productDescription: "Cross platform simple IRC client",
+          productName: "Simple Irc Client",
+          categories: "Network",
         },
       },
     },
