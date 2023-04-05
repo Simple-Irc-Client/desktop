@@ -21,6 +21,9 @@
     "email": "piotr.luczko@gmail.com"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">16"
+  },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "update-electron-app": "^2.0.1"
@@ -32,6 +35,7 @@
     "@electron-forge/maker-squirrel": "^6.1.0",
     "@electron-forge/maker-zip": "^6.1.0",
     "@electron-forge/publisher-github": "^6.1.0",
-    "electron": "23.2.0"
+    "electron": "23.2.0",
+    "ts-node": "^10.9.1"
   }
 }
