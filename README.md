@@ -1,6 +1,6 @@
 ## Simple Irc Client desktop
 
-[![Build status](https://github.com/Simple-Irc-Client/core/actions/workflows/tests.yml/badge.svg)](https://github.com/Simple-Irc-Client/core/actions/workflows/tests.yml)
+[![Build status](https://github.com/Simple-Irc-Client/core/actions/workflows/ci.yml/badge.svg)](https://github.com/Simple-Irc-Client/core/actions/workflows/ci.yml)
 
 
 # Simple Irc Client
