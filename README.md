@@ -1,19 +1,12 @@
-## Simple Irc Client desktop
-
-[![Build status](https://github.com/Simple-Irc-Client/core/actions/workflows/ci.yml/badge.svg)](https://github.com/Simple-Irc-Client/core/actions/workflows/ci.yml)
-
-
 # Simple Irc Client
 
 Simple IRC Client is an open source project that provides a minimalist IRC client for users who don't need all the bells and whistles of a full-featured IRC client.
 
-
-
 [![AGPLv3 License](https://img.shields.io/badge/License-AGPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+
 ## Screenshots
 
 ![App Screenshot](https://via.placeholder.com/468x300?text=Screenshot)
-
 
 ## Contributing
 
@@ -29,4 +22,3 @@ We welcome contributions from the community. To contribute to Simple IRC Client,
 
 - [Piotr Luczko](https://www.github.com/piotrluczko)
 - [Dariusz Markowicz](https://www.github.com/dmarkowicz)
-
