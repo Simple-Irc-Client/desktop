@@ -20,7 +20,7 @@
     "name": "Piotr Luczko",
     "email": "piotr.luczko@gmail.com"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "engines": {
     "node": ">16"
   },
