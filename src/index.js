@@ -1,5 +1,8 @@
 const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
+const Sentry = require("@sentry/electron");
+
+Sentry.init({ dsn: "https://3765d3209d984842b3e2bb456d19de12@o281310.ingest.sentry.io/1506513" });
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
