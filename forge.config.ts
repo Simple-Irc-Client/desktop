@@ -19,6 +19,7 @@ const config: ForgeConfig = {
       /local\-create\.sh/,
       /local\-remove\.sh/,
       /README\.md/,
+      /screenshot\.png/
     ],
     win32metadata: {
       ProductName: "Simple Irc Client",
