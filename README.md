@@ -2,21 +2,17 @@
 
 Simple IRC Client is an open source project that provides a minimalist IRC client for users who don't need all the bells and whistles of a full-featured IRC client.
 
-[![AGPLv3 License](https://img.shields.io/badge/License-AGPL%20v3-yellow.svg)](https://opensource.org/licenses/)
-
 ## Screenshots
 
 ![App Screenshot](./screenshot.png)
 
 ## Contributing
 
-We welcome contributions from the community. To contribute to Simple IRC Client, please follow these steps:
+If you find a bug or would like to contribute to the project, please open an issue or submit a pull request on GitHub.
 
-- Fork the repository
-- Create a new branch for your feature or bug fix
-- Make your changes and commit them
-- Push your changes to your fork
-- Create a pull request to the main repository
+## License
+
+This project is licensed under the [Affero General Public License version 3 (AGPLv3)](https://github.com/Simple-Irc-Client/desktop/blob/main/LICENSE).
 
 ## Authors
 
