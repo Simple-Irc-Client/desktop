@@ -1,7 +1,7 @@
 {
   "name": "simple-irc-client",
   "productName": "simple-irc-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple Irc Client",
   "main": "src/index.js",
   "scripts": {
