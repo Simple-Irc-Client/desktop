@@ -5,6 +5,8 @@ on:
     secrets:
       SIC_PAT:
         required: true
+      VITE_SENTRY_DSN:
+        required: true
     inputs:
       publish:
         default: false
