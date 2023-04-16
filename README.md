@@ -4,6 +4,10 @@ Simple IRC Client is an open source project that provides a minimalist IRC clien
 
 ![App Screenshot](./screenshot.png)
 
+## Download
+
+Latest release can be downloaded from [here](https://github.com/Simple-Irc-Client/desktop/releases)
+
 ## Contributing
 
 If you find a bug or would like to contribute to the project, please open an issue or submit a pull request on GitHub.
