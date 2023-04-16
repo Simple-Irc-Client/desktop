@@ -1,4 +1,4 @@
-# Simple Irc Client
+# Simple Irc Client [![GitHub release](https://img.shields.io/github/release/Simple-Irc-Client/desktop.svg)](https://github.com/Simple-Irc-Client/desktop/releases/)
 
 Simple IRC Client is an open source project that provides a minimalist IRC client for users who don't need all the bells and whistles of a full-featured IRC client.
 
