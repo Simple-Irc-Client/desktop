@@ -16,8 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     permissions:
+      id-token: write
       contents: read
-      repository-projects: read
 
     strategy:
       fail-fast: false
