@@ -17,7 +17,7 @@ jobs:
 
     permissions:
       contents: read
-      id-token: read
+      repository-projects: read
 
     strategy:
       fail-fast: false
