@@ -11,12 +11,12 @@ on:
         required: false
         type: boolean
 
-permissions:
-  id-token: read
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+
+    permissions:
+      id-token: read
 
     strategy:
       fail-fast: false
