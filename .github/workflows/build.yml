@@ -17,6 +17,7 @@ jobs:
 
     permissions:
       contents: read
+      id-token: read
 
     strategy:
       fail-fast: false
