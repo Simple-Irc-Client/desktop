@@ -5,4 +5,5 @@ jobs:
   call-build:
     uses: ./.github/workflows/build.yml
     secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}

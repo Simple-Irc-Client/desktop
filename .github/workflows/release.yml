@@ -10,4 +10,5 @@ jobs:
     with:
       publish: true
     secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
