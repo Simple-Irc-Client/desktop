@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     permissions:
-      id-token: read
+      checks: read
 
     strategy:
       fail-fast: false
