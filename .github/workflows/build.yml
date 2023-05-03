@@ -11,6 +11,10 @@ on:
         required: false
         type: boolean
 
+permissions:
+  id-token: write
+  contents: read
+    
 jobs:
   build:
     runs-on: ${{ matrix.os }}

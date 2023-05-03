@@ -1,6 +1,10 @@
 name: PR
 on: [pull_request]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   call-build:
     uses: ./.github/workflows/build.yml
