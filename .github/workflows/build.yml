@@ -11,10 +11,7 @@ on:
         required: false
         type: boolean
 
-permissions:
-  id-token: write
-  contents: read
-  pull-requests: read
+permissions: read-all
 
 jobs:
   build:
