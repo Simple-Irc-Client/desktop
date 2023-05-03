@@ -11,8 +11,6 @@ on:
         required: false
         type: boolean
 
-permissions: read-all
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -21,6 +19,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v3
