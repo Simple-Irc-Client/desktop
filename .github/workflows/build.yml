@@ -3,6 +3,8 @@ name: Build
 on:
   workflow_call:
     secrets:
+      SIC_PAT:
+        required: true
       VITE_SENTRY_DSN:
         required: true
     inputs:
@@ -10,10 +12,6 @@ on:
         default: false
         required: false
         type: boolean
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   build:
@@ -42,12 +40,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/core
+          token: ${{ secrets.SIC_PAT }}
           path: core
 
       - name: clone network
         uses: actions/checkout@v3
         with:
           repository: Simple-Irc-Client/network
+          token: ${{ secrets.SIC_PAT }}
           path: network
 
       - name: build core
@@ -71,4 +71,6 @@ jobs:
 
       - name: publish
         if: ${{ inputs.publish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
         run: npm run publish
