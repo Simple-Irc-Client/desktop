@@ -16,8 +16,8 @@ const config: ForgeConfig = {
       /\.gitignore/,
       /forge\.config\.js/,
       /forge\.config\.ts/,
-      /local\-create\.sh/,
-      /local\-remove\.sh/,
+      /local-create\.sh/,
+      /local-remove\.sh/,
       /README\.md/,
       /screenshot\.png/
     ],
