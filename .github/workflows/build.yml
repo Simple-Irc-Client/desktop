@@ -23,24 +23,24 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
 
       - name: install dependencies
         run: npm install
 
       - name: clone core
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: Simple-Irc-Client/core
           token: ${{ secrets.SIC_PAT }}
           path: core
 
       - name: clone network
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: Simple-Irc-Client/network
           token: ${{ secrets.SIC_PAT }}
