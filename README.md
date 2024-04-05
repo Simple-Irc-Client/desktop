@@ -20,4 +20,3 @@ This project is licensed under the [Affero General Public License version 3 (AGP
 
 - [Piotr Luczko](https://www.github.com/piotrluczko)
 - [Dariusz Markowicz](https://www.github.com/dmarkowicz)
-
