@@ -47,6 +47,7 @@ jobs:
           path: network
 
       - name: build core
+        shell: bash
         run: |
           cd core
           rm -rf package-lock.json node_modules
@@ -56,6 +57,7 @@ jobs:
           cd ..
 
       - name: build network
+        shell: bash
         run: |
           cd network
           rm -rf package-lock.json node_modules
