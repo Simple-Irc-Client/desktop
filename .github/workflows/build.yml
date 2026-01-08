@@ -49,7 +49,8 @@ jobs:
       - name: build core
         run: |
           cd core
-          npm ci
+          rm -rf package-lock.json node_modules
+          npm install
           npm run build
           cp -r dist/* ../src
           cd ..
@@ -57,7 +58,8 @@ jobs:
       - name: build network
         run: |
           cd network
-          npm ci
+          rm -rf package-lock.json node_modules
+          npm install
           npm run build
           mv irc-network.js ../src
           cd ..
