@@ -57,11 +57,14 @@ const config: ForgeConfig = {
         description: "Cross platform Simple Irc Client",
         productName: "Simple Irc Client",
         files: [],
+        runtimeVersion: "24.08",
       },
     }),
     new MakerSnap({
       // snap
       // https://github.com/electron/forge/blob/main/packages/maker/snap/src/Config.ts
+      stagePackages: ["default"],
+      base: "core24",
     }),
     new MakerDeb({
       // deb
