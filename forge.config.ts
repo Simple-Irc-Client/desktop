@@ -2,6 +2,9 @@ import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
+import { MakerWix } from "@electron-forge/maker-wix";
+import { MakerFlatpak } from "@electron-forge/maker-flatpak";
+import { MakerSnap } from "@electron-forge/maker-snap";
 import { PublisherGithub } from "@electron-forge/publisher-github";
 import { cpSync } from "fs";
 
@@ -29,11 +32,39 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
+      // exe
       // https://github.com/electron/forge/blob/main/packages/maker/squirrel/src/MakerSquirrel.ts
       iconUrl: "https://simpleircclient.pages.dev/favicon.ico",
       setupIcon: "./build/icons/icon.ico",
     }),
+    new MakerWix({
+      // msi
+      // https://github.com/electron/forge/blob/main/packages/maker/wix/src/Config.ts
+      name: "simple-irc-client",
+      icon: "./build/icons/icon.ico",
+      manufacturer: "Simple Irc Client Team",
+      ui: {
+        chooseDirectory: true,
+      },
+    }),
+    new MakerFlatpak({
+      // flatpack
+      options: {
+        // https://github.com/electron/forge/blob/main/packages/maker/flatpak/src/Config.ts
+        id: "com.simpleircclient.desktop",
+        icon: "./build/icons/icon.png",
+        categories: ["Network"],
+        description: "Cross platform Simple Irc Client",
+        productName: "Simple Irc Client",
+        files: [],
+      },
+    }),
+    new MakerSnap({
+      // snap
+      // https://github.com/electron/forge/blob/main/packages/maker/snap/src/Config.ts
+    }),
     new MakerDeb({
+      // deb
       options: {
         // https://github.com/electron/forge/blob/main/packages/maker/deb/src/Config.ts
         name: "simple-irc-client",
@@ -48,6 +79,7 @@ const config: ForgeConfig = {
       },
     }),
     new MakerRpm({
+      // rpm
       options: {
         // https://github.com/electron/forge/blob/main/packages/maker/rpm/src/Config.ts
         name: "simple-irc-client",
