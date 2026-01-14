@@ -4,7 +4,6 @@ import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
-import { MakerSnap } from "@electron-forge/maker-snap";
 import { PublisherGithub } from "@electron-forge/publisher-github";
 import { cpSync } from "fs";
 
@@ -59,12 +58,6 @@ const config: ForgeConfig = {
         files: [],
         runtimeVersion: "24.08",
       },
-    }),
-    new MakerSnap({
-      // snap
-      // https://github.com/electron/forge/blob/main/packages/maker/snap/src/Config.ts
-      stagePackages: ["default"],
-      base: "core24",
     }),
     new MakerDeb({
       // deb
