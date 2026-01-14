@@ -70,7 +70,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder elfutils snapcraft rpm
+          sudo apt-get install -y flatpak flatpak-builder elfutils rpm
+          sudo snap install snapcraft --classic
 
       - name: build electron
         run: npm run make
