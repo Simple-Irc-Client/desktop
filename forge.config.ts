@@ -57,6 +57,8 @@ const config: ForgeConfig = {
         productName: "Simple Irc Client",
         files: [],
         runtimeVersion: "24.08",
+        baseVersion: "24.08",
+        modules: [],
       },
     }),
     new MakerDeb({
