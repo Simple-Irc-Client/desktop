@@ -75,6 +75,8 @@ jobs:
           sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
 
       - name: build electron
+        env:
+          DEBUG: electron-installer-flatpak*
         run: npm run make
 
       - name: publish
