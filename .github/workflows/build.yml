@@ -66,6 +66,12 @@ jobs:
           mv irc-network.js ../src
           cd ..
 
+      - name: install Linux packaging dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder elfutils snapcraft rpm
+
       - name: build electron
         run: npm run make
 
