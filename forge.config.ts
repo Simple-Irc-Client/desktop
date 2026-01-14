@@ -48,7 +48,7 @@ const config: ForgeConfig = {
       },
     }),
     new MakerFlatpak({
-      // flatpack
+      // flatpak
       options: {
         // https://github.com/electron/forge/blob/main/packages/maker/flatpak/src/Config.ts
         id: "com.simpleircclient.desktop",
