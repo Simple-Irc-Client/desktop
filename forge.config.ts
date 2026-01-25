@@ -39,7 +39,8 @@ const config: ForgeConfig = {
     new MakerWix({
       // msi
       // https://github.com/electron/forge/blob/main/packages/maker/wix/src/Config.ts
-      name: "simple-irc-client",
+      name: "Simple Irc Client",
+      description: "Cross platform Simple Irc Client",
       icon: "./build/icons/icon.ico",
       manufacturer: "Simple Irc Client Team",
       ui: {
