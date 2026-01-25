@@ -1,8 +1,14 @@
-const { app, BrowserWindow, Menu } = require("electron");
-const path = require("path");
+import { app, BrowserWindow, Menu } from "electron";
+import path from "path";
+import { fileURLToPath } from "url";
+import started from "electron-squirrel-startup";
+import updateElectronApp from "update-electron-app";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
+if (started) {
   app.quit();
 }
 
@@ -55,4 +61,4 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
-require("update-electron-app")();
+updateElectronApp();
