@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
 const started = require("electron-squirrel-startup");
-const updateElectronApp = require("update-electron-app");
+const { updateElectronApp } = require("update-electron-app");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
