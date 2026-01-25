@@ -33,7 +33,7 @@ const config: ForgeConfig = {
     new MakerSquirrel({
       // exe
       // https://github.com/electron/forge/blob/main/packages/maker/squirrel/src/MakerSquirrel.ts
-      iconUrl: "https://simpleircclient.pages.dev/favicon.ico",
+      iconUrl: "https://simpleircclient.com/favicon.ico",
       setupIcon: "./build/icons/icon.ico",
     }),
     new MakerWix({
