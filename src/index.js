@@ -64,6 +64,4 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
-updateElectronApp({
-  logger: require("electron-log"),
-});
+updateElectronApp();
