@@ -61,7 +61,37 @@ jobs:
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
 
+      - name: install AppImage dependencies
+        run: |
+          sudo apt-get install -y dpkg dpkg-deb imagemagick wget grep sed file desktop-file-utils
+
       - name: build electron
         env:
           DEBUG: electron-installer-flatpak*
         run: npm run make
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Download pkg2appimage
+        run: git clone https://github.com/AppImageCommunity/pkg2appimage.git
+
+      - name: Prepare AppImage config
+        run: |
+          DEB_PATH=$(realpath out/make/deb/x64/*.deb)
+          sed -i -e "s|REPLACE_DEB_PATH|$DEB_PATH|g" resources/packaging/linux/AppImage/simple-irc-client.yml
+
+      - name: Create AppImage
+        run: |
+          cd pkg2appimage
+          ARCH=x86_64 ./pkg2appimage ../resources/packaging/linux/AppImage/simple-irc-client.yml
+          mkdir -p /tmp/appimage
+          mv out/*.AppImage /tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: appimage
+          path: /tmp/appimage/
+          if-no-files-found: error

@@ -1,0 +1,14 @@
+app: Simple Irc Client
+ingredients:
+  dist: oldstable
+  packages:
+    - libgtk-3-0
+    - libnss3
+    - libasound2
+    - libxss1
+    - libxtst6
+    - xdg-utils
+  sources:
+    - deb http://deb.debian.org/debian oldstable main
+  debs:
+    - REPLACE_DEB_PATH

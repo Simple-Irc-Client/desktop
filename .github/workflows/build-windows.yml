@@ -58,3 +58,21 @@ jobs:
 
       - name: build electron
         run: npm run make
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Rename MSI with version
+        shell: bash
+        run: |
+          mkdir -p /tmp/msi
+          mv out/make/wix/x64/*.msi /tmp/msi/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: msi
+          path: /tmp/msi/
+          if-no-files-found: error
