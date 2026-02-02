@@ -1,5 +1,6 @@
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
+import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
@@ -9,6 +10,7 @@ import { cpSync } from "fs";
 
 const config: ForgeConfig = {
   packagerConfig: {
+    appBundleId: "com.simpleircclient.desktop",
     icon: "./build/icons/icon",
     ignore: [
       /\.github/,
@@ -27,9 +29,16 @@ const config: ForgeConfig = {
       ProductName: "Simple Irc Client",
       CompanyName: "Simple Irc Client",
     },
+    osxSign: {},
+    osxNotarize: {
+      appleId: process.env.APPLE_ID as string,
+      appleIdPassword: process.env.APPLE_PASSWORD as string,
+      teamId: process.env.APPLE_TEAM_ID as string,
+    },
   },
   rebuildConfig: {},
   makers: [
+    new MakerZIP({}, ["darwin"]),
     new MakerSquirrel({
       // exe
       // https://github.com/electron/forge/blob/main/packages/maker/squirrel/src/MakerSquirrel.ts

@@ -1,0 +1,60 @@
+name: Build Windows
+
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+      VITE_SENTRY_DSN:
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: install dependencies
+        run: npm install
+
+      - name: clone core
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/core
+          token: ${{ secrets.SIC_PAT }}
+          path: core
+
+      - name: clone network
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/network
+          token: ${{ secrets.SIC_PAT }}
+          path: network
+
+      - name: build core
+        shell: bash
+        run: |
+          cd core
+          rm -rf package-lock.json node_modules
+          npm install
+          npm run build
+          cp -r dist/* ../src
+          cd ..
+
+      - name: build network
+        shell: bash
+        run: |
+          cd network
+          rm -rf package-lock.json node_modules
+          npm install
+          npm run build
+          mv irc-network.js ../src
+          cd ..
+
+      - name: build electron
+        run: npm run make

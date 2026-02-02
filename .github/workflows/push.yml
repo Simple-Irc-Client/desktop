@@ -2,8 +2,20 @@ name: PR
 on: [pull_request]
 
 jobs:
-  call-build:
-    uses: ./.github/workflows/build.yml
+  build-linux:
+    uses: ./.github/workflows/build-linux.yml
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+  build-windows:
+    uses: ./.github/workflows/build-windows.yml
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+  build-macos:
+    uses: ./.github/workflows/build-macos.yml
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}

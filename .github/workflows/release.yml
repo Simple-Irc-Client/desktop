@@ -5,10 +5,31 @@ on:
       - created
 
 jobs:
-  call-build:
-    uses: ./.github/workflows/build.yml
+  release-linux:
+    uses: ./.github/workflows/release-linux.yml
     with:
       publish: true
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+  release-windows:
+    uses: ./.github/workflows/release-windows.yml
+    with:
+      publish: true
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+  release-macos:
+    uses: ./.github/workflows/release-macos.yml
+    with:
+      publish: true
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+      CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}

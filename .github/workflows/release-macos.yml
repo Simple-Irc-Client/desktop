@@ -1,4 +1,4 @@
-name: Build
+name: Release macOS
 
 on:
   workflow_call:
@@ -7,6 +7,16 @@ on:
         required: true
       VITE_SENTRY_DSN:
         required: true
+      APPLE_ID:
+        required: false
+      APPLE_PASSWORD:
+        required: false
+      APPLE_TEAM_ID:
+        required: false
+      CERTIFICATE_P12:
+        required: false
+      CERTIFICATE_PASSWORD:
+        required: false
     inputs:
       publish:
         default: false
@@ -15,12 +25,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v6
@@ -47,7 +52,6 @@ jobs:
           path: network
 
       - name: build core
-        shell: bash
         run: |
           cd core
           rm -rf package-lock.json node_modules
@@ -57,7 +61,6 @@ jobs:
           cd ..
 
       - name: build network
-        shell: bash
         run: |
           cd network
           rm -rf package-lock.json node_modules
@@ -66,17 +69,25 @@ jobs:
           mv irc-network.js ../src
           cd ..
 
-      - name: install Linux packaging dependencies
-        if: runner.os == 'Linux'
+      - name: import certificate
+        if: ${{ secrets.CERTIFICATE_P12 != '' }}
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder elfutils rpm
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
+          echo $CERTIFICATE_P12 | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          rm certificate.p12
 
       - name: build electron
         env:
-          DEBUG: electron-installer-flatpak*
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run make
 
       - name: publish

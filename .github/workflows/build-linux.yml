@@ -1,0 +1,67 @@
+name: Build Linux
+
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+      VITE_SENTRY_DSN:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: install dependencies
+        run: npm install
+
+      - name: clone core
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/core
+          token: ${{ secrets.SIC_PAT }}
+          path: core
+
+      - name: clone network
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/network
+          token: ${{ secrets.SIC_PAT }}
+          path: network
+
+      - name: build core
+        run: |
+          cd core
+          rm -rf package-lock.json node_modules
+          npm install
+          npm run build
+          cp -r dist/* ../src
+          cd ..
+
+      - name: build network
+        run: |
+          cd network
+          rm -rf package-lock.json node_modules
+          npm install
+          npm run build
+          mv irc-network.js ../src
+          cd ..
+
+      - name: install Linux packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder elfutils rpm
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
+
+      - name: build electron
+        env:
+          DEBUG: electron-installer-flatpak*
+        run: npm run make
