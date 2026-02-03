@@ -68,7 +68,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p msi-artifact
-          mv out/make/wix/x64/*.msi msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi
+          echo "Looking for MSI files:"
+          find out -name "*.msi" -type f
+          MSI_FILE=$(find out -name "*.msi" -type f | head -1)
+          echo "Found: $MSI_FILE"
+          cp "$MSI_FILE" "msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi"
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v6
