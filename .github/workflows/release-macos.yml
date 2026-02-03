@@ -80,6 +80,7 @@ jobs:
           fi
           printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
           echo "P12 file size: $(wc -c < certificate.p12) bytes"
+          echo "P12 file hash: $(shasum -a 256 certificate.p12 | cut -d' ' -f1)"
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
