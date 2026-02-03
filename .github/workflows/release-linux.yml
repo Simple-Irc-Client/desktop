@@ -68,7 +68,7 @@ jobs:
 
       - name: install AppImage dependencies
         run: |
-          sudo apt-get install -y dpkg dpkg-deb imagemagick wget grep sed file desktop-file-utils
+          sudo apt-get install -y imagemagick file desktop-file-utils
 
       - name: build electron
         env:

@@ -72,14 +72,14 @@ jobs:
       - name: Rename MSI with version
         shell: bash
         run: |
-          mkdir -p /tmp/msi
-          mv out/make/wix/x64/*.msi /tmp/msi/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi
+          mkdir -p msi-artifact
+          mv out/make/wix/x64/*.msi msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v6
         with:
           name: msi
-          path: /tmp/msi/
+          path: msi-artifact/
           if-no-files-found: error
 
       - name: publish
