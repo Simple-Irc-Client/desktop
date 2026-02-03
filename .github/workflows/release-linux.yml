@@ -106,3 +106,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
         run: npm run publish
+
+      - name: Upload AppImage to release
+        if: ${{ inputs.publish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+        run: |
+          gh release upload "v${{ steps.version.outputs.version }}" /tmp/appimage/*.AppImage --clobber

@@ -76,8 +76,10 @@ jobs:
           echo "Looking for MSI files:"
           find out -name "*.msi" -type f
           MSI_FILE=$(find out -name "*.msi" -type f | head -1)
+          MSI_DIR=$(dirname "$MSI_FILE")
           echo "Found: $MSI_FILE"
-          cp "$MSI_FILE" "msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi"
+          mv "$MSI_FILE" "$MSI_DIR/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi"
+          cp "$MSI_DIR/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi" msi-artifact/
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v6
