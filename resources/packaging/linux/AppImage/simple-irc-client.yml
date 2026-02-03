@@ -1,4 +1,4 @@
-app: Simple Irc Client
+app: simple-irc-client
 ingredients:
   dist: oldstable
   packages:

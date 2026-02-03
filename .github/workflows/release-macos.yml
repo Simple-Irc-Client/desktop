@@ -78,11 +78,12 @@ jobs:
             echo "No certificate provided, skipping code signing setup"
             exit 0
           fi
-          echo $CERTIFICATE_P12 | base64 --decode > certificate.p12
+          printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
+          echo "P12 file size: $(wc -c < certificate.p12) bytes"
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
-          security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security import certificate.p12 -k build.keychain -P "${CERTIFICATE_PASSWORD}" -T /usr/bin/codesign -A
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
           rm certificate.p12
 
