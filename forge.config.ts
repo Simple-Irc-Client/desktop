@@ -92,19 +92,19 @@ const config: ForgeConfig = {
         maintainer: "Simple Irc Client Team",
       },
     }),
-    // new MakerRpm({
-    //   // rpm
-    //   options: {
-    //     // https://github.com/electron/forge/blob/main/packages/maker/rpm/src/Config.ts
-    //     name: "simple-irc-client",
-    //     icon: "./build/icons/icon.png",
-    //     homepage: "https://simpleircclient.com",
-    //     categories: ["Network"],
-    //     description: "Cross platform Simple Irc Client",
-    //     productDescription: "Cross platform Simple Irc Client",
-    //     productName: "Simple Irc Client",
-    //   },
-    // }),
+    new MakerRpm({
+      // rpm
+      options: {
+        // https://github.com/electron/forge/blob/main/packages/maker/rpm/src/Config.ts
+        name: "simple-irc-client",
+        icon: "./build/icons/icon.png",
+        homepage: "https://simpleircclient.com",
+        categories: ["Network"],
+        description: "Cross platform Simple Irc Client",
+        productDescription: "Cross platform Simple Irc Client",
+        productName: "Simple Irc Client",
+      },
+    }),
   ],
   hooks: {
     packageAfterCopy: async (
