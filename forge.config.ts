@@ -5,6 +5,7 @@ import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 
 import { cpSync } from "fs";
 
@@ -45,6 +46,12 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   makers: [
     new MakerZIP({}, ["darwin"]),
+    new MakerDMG({
+      // dmg
+      // https://github.com/electron/forge/blob/main/packages/maker/dmg/src/MakerDMG.ts
+      icon: "./build/icons/icon.icns",
+      name: "Simple Irc Client",
+    }),
     new MakerSquirrel({
       // exe
       // https://github.com/electron/forge/blob/main/packages/maker/squirrel/src/MakerSquirrel.ts
