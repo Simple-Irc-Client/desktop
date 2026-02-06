@@ -91,8 +91,17 @@ jobs:
         run: |
           cd pkg2appimage
           ARCH=x86_64 ./pkg2appimage ../resources/packaging/linux/AppImage/simple-irc-client.yml
+          echo "Searching for AppImage files:"
+          find out -name "*.AppImage" -type f 2>/dev/null || true
+          APPIMAGE_FILE=$(find out -name "*.AppImage" -type f | head -1)
+          if [ -z "$APPIMAGE_FILE" ]; then
+            echo "ERROR: No AppImage file found in out/"
+            ls -laR out/ || true
+            exit 1
+          fi
+          echo "Found AppImage: $APPIMAGE_FILE"
           mkdir -p /tmp/appimage
-          mv out/*.AppImage /tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage
+          mv "$APPIMAGE_FILE" /tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v6
