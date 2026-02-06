@@ -1,0 +1,58 @@
+name: Build Windows MSI
+
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+    inputs:
+      publish:
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: download MSI artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: msi-raw
+          path: msi-raw/
+
+      - name: Rename MSI with version
+        run: |
+          mkdir -p msi-artifact
+          MSI_FILE=$(find msi-raw -name "*.msi" -type f | head -1)
+          if [ -z "$MSI_FILE" ]; then
+            echo "ERROR: No MSI file found"
+            exit 1
+          fi
+          echo "Found: $MSI_FILE"
+          cp "$MSI_FILE" "msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi"
+
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: msi
+          path: msi-artifact/
+          if-no-files-found: error
+
+      - name: Upload MSI to release
+        if: ${{ inputs.publish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+        run: |
+          gh release upload "v${{ steps.version.outputs.version }}" msi-artifact/*.msi --clobber

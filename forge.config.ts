@@ -5,7 +5,7 @@ import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
-import { PublisherGithub } from "@electron-forge/publisher-github";
+
 import { cpSync } from "fs";
 
 const config: ForgeConfig = {
@@ -17,6 +17,7 @@ const config: ForgeConfig = {
       /build/,
       /core/,
       /network/,
+      /built-deps/,
       /\.gitignore/,
       /forge\.config\.js/,
       /forge\.config\.ts/,
@@ -30,12 +31,16 @@ const config: ForgeConfig = {
       ProductName: "Simple Irc Client",
       CompanyName: "Simple Irc Client",
     },
-    osxSign: {},
-    osxNotarize: {
-      appleId: process.env.APPLE_ID as string,
-      appleIdPassword: process.env.APPLE_PASSWORD as string,
-      teamId: process.env.APPLE_TEAM_ID as string,
-    },
+    ...(process.env.APPLE_ID
+      ? {
+          osxSign: {},
+          osxNotarize: {
+            appleId: process.env.APPLE_ID,
+            appleIdPassword: process.env.APPLE_PASSWORD as string,
+            teamId: process.env.APPLE_TEAM_ID as string,
+          },
+        }
+      : {}),
   },
   rebuildConfig: {},
   makers: [
@@ -100,14 +105,6 @@ const config: ForgeConfig = {
     //     productName: "Simple Irc Client",
     //   },
     // }),
-  ],
-  publishers: [
-    new PublisherGithub({
-      repository: {
-        owner: "Simple-Irc-Client",
-        name: "desktop",
-      },
-    }),
   ],
   hooks: {
     packageAfterCopy: async (

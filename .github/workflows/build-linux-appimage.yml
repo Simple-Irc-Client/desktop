@@ -1,0 +1,77 @@
+name: Build AppImage
+
+on:
+  workflow_call:
+    secrets:
+      SIC_PAT:
+        required: true
+    inputs:
+      publish:
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: download deb artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: deb
+          path: deb/
+
+      - name: install AppImage dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick file desktop-file-utils
+
+      - name: Download pkg2appimage
+        run: git clone https://github.com/AppImageCommunity/pkg2appimage.git
+
+      - name: Prepare AppImage config
+        run: |
+          DEB_PATH=$(realpath deb/*.deb)
+          echo "Using deb: $DEB_PATH"
+          sed -i -e "s|REPLACE_DEB_PATH|$DEB_PATH|g" resources/packaging/linux/AppImage/simple-irc-client.yml
+
+      - name: Create AppImage
+        run: |
+          cd pkg2appimage
+          ARCH=x86_64 ./pkg2appimage ../resources/packaging/linux/AppImage/simple-irc-client.yml
+          echo "Searching for AppImage files:"
+          find out -name "*.AppImage" -type f 2>/dev/null || true
+          APPIMAGE_FILE=$(find out -name "*.AppImage" -type f | head -1)
+          if [ -z "$APPIMAGE_FILE" ]; then
+            echo "ERROR: No AppImage file found in out/"
+            ls -laR out/ || true
+            exit 1
+          fi
+          echo "Found AppImage: $APPIMAGE_FILE"
+          mkdir -p /tmp/appimage
+          mv "$APPIMAGE_FILE" /tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: appimage
+          path: /tmp/appimage/
+          if-no-files-found: error
+
+      - name: Upload AppImage to release
+        if: ${{ inputs.publish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+        run: |
+          gh release upload "v${{ steps.version.outputs.version }}" /tmp/appimage/*.AppImage --clobber

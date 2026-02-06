@@ -27,37 +27,15 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: clone core
-        uses: actions/checkout@v6
+      - name: download built deps
+        uses: actions/download-artifact@v6
         with:
-          repository: Simple-Irc-Client/core
-          token: ${{ secrets.SIC_PAT }}
-          path: core
+          name: built-deps
+          path: built-deps/
 
-      - name: clone network
-        uses: actions/checkout@v6
-        with:
-          repository: Simple-Irc-Client/network
-          token: ${{ secrets.SIC_PAT }}
-          path: network
-
-      - name: build core
+      - name: install deps into src
         run: |
-          cd core
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
-          cp -r dist/* ../src
-          cd ..
-
-      - name: build network
-        run: |
-          cd network
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
-          mv irc-network.js ../src
-          cd ..
+          cp -r built-deps/* src/
 
       - name: install Linux packaging dependencies
         run: |
@@ -65,10 +43,6 @@ jobs:
           sudo apt-get install -y flatpak flatpak-builder elfutils rpm
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
-
-      - name: install AppImage dependencies
-        run: |
-          sudo apt-get install -y imagemagick file desktop-file-utils
 
       - name: build electron
         env:
@@ -79,46 +53,17 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Download pkg2appimage
-        run: git clone https://github.com/AppImageCommunity/pkg2appimage.git
-
-      - name: Prepare AppImage config
-        run: |
-          DEB_PATH=$(realpath out/make/deb/x64/*.deb)
-          sed -i -e "s|REPLACE_DEB_PATH|$DEB_PATH|g" resources/packaging/linux/AppImage/simple-irc-client.yml
-
-      - name: Create AppImage
-        run: |
-          cd pkg2appimage
-          ARCH=x86_64 ./pkg2appimage ../resources/packaging/linux/AppImage/simple-irc-client.yml
-          echo "Searching for AppImage files:"
-          find out -name "*.AppImage" -type f 2>/dev/null || true
-          APPIMAGE_FILE=$(find out -name "*.AppImage" -type f | head -1)
-          if [ -z "$APPIMAGE_FILE" ]; then
-            echo "ERROR: No AppImage file found in out/"
-            ls -laR out/ || true
-            exit 1
-          fi
-          echo "Found AppImage: $APPIMAGE_FILE"
-          mkdir -p /tmp/appimage
-          mv "$APPIMAGE_FILE" /tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage
-
-      - name: Upload AppImage artifact
+      - name: Upload deb artifact
         uses: actions/upload-artifact@v6
         with:
-          name: appimage
-          path: /tmp/appimage/
+          name: deb
+          path: out/make/deb/x64/*.deb
           if-no-files-found: error
 
-      - name: publish
+      - name: Upload deb to release
         if: ${{ inputs.publish }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
-        run: npm run publish
-
-      - name: Upload AppImage to release
-        if: ${{ inputs.publish }}
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
         run: |
-          gh release upload "v${{ steps.version.outputs.version }}" /tmp/appimage/*.AppImage --clobber
+          gh release upload "v${{ steps.version.outputs.version }}" out/make/deb/x64/*.deb --clobber

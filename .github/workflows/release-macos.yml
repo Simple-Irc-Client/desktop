@@ -37,46 +37,26 @@ jobs:
       - name: install dependencies
         run: npm install
 
-      - name: clone core
-        uses: actions/checkout@v6
+      - name: download built deps
+        uses: actions/download-artifact@v6
         with:
-          repository: Simple-Irc-Client/core
-          token: ${{ secrets.SIC_PAT }}
-          path: core
+          name: built-deps
+          path: built-deps/
 
-      - name: clone network
-        uses: actions/checkout@v6
-        with:
-          repository: Simple-Irc-Client/network
-          token: ${{ secrets.SIC_PAT }}
-          path: network
-
-      - name: build core
+      - name: install deps into src
         run: |
-          cd core
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
-          cp -r dist/* ../src
-          cd ..
-
-      - name: build network
-        run: |
-          cd network
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
-          mv irc-network.js ../src
-          cd ..
+          cp -r built-deps/* src/
 
       - name: import certificate
+        id: import-cert
+        continue-on-error: true
         env:
           CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
           if [ -z "$CERTIFICATE_P12" ]; then
             echo "No certificate provided, skipping code signing setup"
-            exit 0
+            exit 1
           fi
           printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
           echo "P12 file size: $(wc -c < certificate.p12) bytes"
@@ -88,15 +68,64 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
           rm certificate.p12
 
-      - name: build electron
+      - name: build electron (signed)
+        id: build-signed
+        if: steps.import-cert.outcome == 'success'
+        continue-on-error: true
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run make
 
-      - name: publish
+      - name: clean output for unsigned retry
+        if: steps.build-signed.outcome != 'success'
+        run: rm -rf out/
+
+      - name: build electron (unsigned)
+        if: steps.build-signed.outcome != 'success'
+        run: npm run make
+
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Determine signing status
+        id: signing
+        run: |
+          if [ "${{ steps.build-signed.outcome }}" = "success" ]; then
+            echo "suffix=" >> $GITHUB_OUTPUT
+            echo "signed=true" >> $GITHUB_OUTPUT
+          else
+            echo "suffix=_not_signed" >> $GITHUB_OUTPUT
+            echo "signed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Rename macOS artifact
+        run: |
+          mkdir -p macos-artifact
+          ZIP_FILE=$(find out/make -name "*.zip" -type f | head -1)
+          if [ -n "$ZIP_FILE" ]; then
+            cp "$ZIP_FILE" "macos-artifact/simple-irc-client_${{ steps.version.outputs.version }}${{ steps.signing.outputs.suffix }}_arm64.zip"
+          fi
+          DMG_FILE=$(find out/make -name "*.dmg" -type f | head -1)
+          if [ -n "$DMG_FILE" ]; then
+            cp "$DMG_FILE" "macos-artifact/simple-irc-client_${{ steps.version.outputs.version }}${{ steps.signing.outputs.suffix }}_arm64.dmg"
+          fi
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: macos
+          path: macos-artifact/
+          if-no-files-found: warn
+
+      - name: Upload macOS to release
         if: ${{ inputs.publish }}
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
-        run: npm run publish
+        run: |
+          for f in macos-artifact/*; do
+            [ -f "$f" ] && gh release upload "v${{ steps.version.outputs.version }}" "$f" --clobber
+          done

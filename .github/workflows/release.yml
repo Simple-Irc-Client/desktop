@@ -5,7 +5,13 @@ on:
       - created
 
 jobs:
+  build-deps:
+    uses: ./.github/workflows/build-deps.yml
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+
   release-linux:
+    needs: build-deps
     uses: ./.github/workflows/release-linux.yml
     with:
       publish: true
@@ -13,7 +19,16 @@ jobs:
       SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
+  release-linux-appimage:
+    needs: release-linux
+    uses: ./.github/workflows/build-linux-appimage.yml
+    with:
+      publish: true
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+
   release-windows:
+    needs: build-deps
     uses: ./.github/workflows/release-windows.yml
     with:
       publish: true
@@ -21,7 +36,16 @@ jobs:
       SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
+  release-windows-msi:
+    needs: release-windows
+    uses: ./.github/workflows/build-windows-msi.yml
+    with:
+      publish: true
+    secrets:
+      SIC_PAT: ${{ secrets.SIC_PAT }}
+
   release-macos:
+    needs: build-deps
     uses: ./.github/workflows/release-macos.yml
     with:
       publish: true
