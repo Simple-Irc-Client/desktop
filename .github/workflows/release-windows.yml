@@ -46,21 +46,22 @@ jobs:
 
       - name: Import certificate
         id: import-cert
-        continue-on-error: true
         shell: bash
         env:
           WINDOWS_CERTIFICATE_P12: ${{ secrets.WINDOWS_CERTIFICATE_P12 }}
         run: |
           if [ -z "$WINDOWS_CERTIFICATE_P12" ]; then
             echo "No certificate provided, skipping signing"
-            exit 1
+            echo "has_cert=false" >> $GITHUB_OUTPUT
+          else
+            echo "$WINDOWS_CERTIFICATE_P12" | base64 --decode > certificate.pfx
+            echo "WINDOWS_CERTIFICATE_FILE=$(pwd)/certificate.pfx" >> $GITHUB_ENV
+            echo "has_cert=true" >> $GITHUB_OUTPUT
           fi
-          echo "$WINDOWS_CERTIFICATE_P12" | base64 --decode > certificate.pfx
-          echo "WINDOWS_CERTIFICATE_FILE=$(pwd)/certificate.pfx" >> $GITHUB_ENV
 
       - name: Build electron (signed)
         id: build-signed
-        if: steps.import-cert.outcome == 'success'
+        if: steps.import-cert.outputs.has_cert == 'true'
         continue-on-error: true
         env:
           WINDOWS_CERTIFICATE_FILE: ${{ env.WINDOWS_CERTIFICATE_FILE }}
@@ -68,7 +69,7 @@ jobs:
         run: npm run make
 
       - name: Build electron (unsigned fallback)
-        if: steps.build-signed.outcome != 'success'
+        if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
         shell: bash
         run: |
           rm -rf out/
@@ -78,7 +79,7 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          if [ "${{ steps.build-signed.outcome }}" = "success" ]; then
+          if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.import-cert.outputs.has_cert }}" = "true" ]; then
             SUFFIX=""
           else
             SUFFIX="_not_signed"
@@ -97,7 +98,7 @@ jobs:
           fi
 
       - name: Clean up certificate
-        if: steps.import-cert.outcome == 'success'
+        if: steps.import-cert.outputs.has_cert == 'true'
         shell: bash
         run: rm -f certificate.pfx
 

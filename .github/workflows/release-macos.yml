@@ -50,26 +50,27 @@ jobs:
 
       - name: Import certificate
         id: import-cert
-        continue-on-error: true
         env:
           CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
           if [ -z "$CERTIFICATE_P12" ]; then
             echo "No certificate provided, skipping signing"
-            exit 1
+            echo "has_cert=false" >> $GITHUB_OUTPUT
+          else
+            printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
+            security create-keychain -p "" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "" build.keychain
+            security import certificate.p12 -k build.keychain -P "${CERTIFICATE_PASSWORD}" -T /usr/bin/codesign -A
+            security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+            rm certificate.p12
+            echo "has_cert=true" >> $GITHUB_OUTPUT
           fi
-          printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          security import certificate.p12 -k build.keychain -P "${CERTIFICATE_PASSWORD}" -T /usr/bin/codesign -A
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-          rm certificate.p12
 
       - name: Build electron (signed)
         id: build-signed
-        if: steps.import-cert.outcome == 'success'
+        if: steps.import-cert.outputs.has_cert == 'true'
         continue-on-error: true
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -78,7 +79,7 @@ jobs:
         run: npm run make
 
       - name: Build electron (unsigned fallback)
-        if: steps.build-signed.outcome != 'success'
+        if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
         run: |
           rm -rf out/
           npm run make
@@ -86,7 +87,7 @@ jobs:
       - name: Prepare macOS artifact
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          if [ "${{ steps.build-signed.outcome }}" = "success" ]; then
+          if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.import-cert.outputs.has_cert }}" = "true" ]; then
             SUFFIX=""
           else
             SUFFIX="_not_signed"
