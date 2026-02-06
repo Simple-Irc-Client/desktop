@@ -34,14 +34,8 @@ jobs:
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-
-  release-windows-msi:
-    needs: release-windows
-    uses: ./.github/workflows/build-windows-msi.yml
-    with:
-      publish: true
-    secrets:
-      SIC_PAT: ${{ secrets.SIC_PAT }}
+      WINDOWS_CERTIFICATE_P12: ${{ secrets.WINDOWS_CERTIFICATE_P12 }}
+      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
 
   release-macos:
     needs: build-deps

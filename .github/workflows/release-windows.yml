@@ -7,6 +7,10 @@ on:
         required: true
       VITE_SENTRY_DSN:
         required: true
+      WINDOWS_CERTIFICATE_P12:
+        required: false
+      WINDOWS_CERTIFICATE_PASSWORD:
+        required: false
     inputs:
       publish:
         default: false
@@ -35,12 +39,82 @@ jobs:
         shell: bash
         run: cp -r built-deps/* src/
 
-      - name: Build electron
+      - name: Get version
+        id: version
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Import certificate
+        id: import-cert
+        continue-on-error: true
+        shell: bash
+        env:
+          WINDOWS_CERTIFICATE_P12: ${{ secrets.WINDOWS_CERTIFICATE_P12 }}
+        run: |
+          if [ -z "$WINDOWS_CERTIFICATE_P12" ]; then
+            echo "No certificate provided, skipping signing"
+            exit 1
+          fi
+          echo "$WINDOWS_CERTIFICATE_P12" | base64 --decode > certificate.pfx
+          echo "WINDOWS_CERTIFICATE_FILE=$(pwd)/certificate.pfx" >> $GITHUB_ENV
+
+      - name: Build electron (signed)
+        id: build-signed
+        if: steps.import-cert.outcome == 'success'
+        continue-on-error: true
+        env:
+          WINDOWS_CERTIFICATE_FILE: ${{ env.WINDOWS_CERTIFICATE_FILE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
         run: npm run make
 
-      - name: Upload raw MSI artifact
+      - name: Build electron (unsigned fallback)
+        if: steps.build-signed.outcome != 'success'
+        shell: bash
+        run: |
+          rm -rf out/
+          npm run make
+
+      - name: Prepare Windows artifacts
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if [ "${{ steps.build-signed.outcome }}" = "success" ]; then
+            SUFFIX=""
+          else
+            SUFFIX="_not_signed"
+          fi
+
+          mkdir -p windows-artifact
+
+          MSI_FILE=$(find out -name "*.msi" -type f | head -1)
+          if [ -n "$MSI_FILE" ]; then
+            mv "$MSI_FILE" "windows-artifact/simple-irc-client_${VERSION}${SUFFIX}_windows_x64.msi"
+          fi
+
+          EXE_FILE=$(find out -name "*.exe" -type f | head -1)
+          if [ -n "$EXE_FILE" ]; then
+            mv "$EXE_FILE" "windows-artifact/simple-irc-client_${VERSION}${SUFFIX}_windows_x64.exe"
+          fi
+
+      - name: Clean up certificate
+        if: steps.import-cert.outcome == 'success'
+        shell: bash
+        run: rm -f certificate.pfx
+
+      - name: Upload Windows artifact
         uses: actions/upload-artifact@v6
         with:
-          name: msi-raw
-          path: out/make/wix/x64/*.msi
+          name: windows
+          path: windows-artifact/
           if-no-files-found: warn
+
+      - name: Upload Windows to release
+        if: ${{ inputs.publish }}
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+        run: |
+          for f in windows-artifact/*; do
+            [ -f "$f" ] && gh release upload "v${{ steps.version.outputs.version }}" "$f" --clobber
+          done

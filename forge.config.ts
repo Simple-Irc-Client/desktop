@@ -32,6 +32,14 @@ const config: ForgeConfig = {
       ProductName: "Simple Irc Client",
       CompanyName: "Simple Irc Client",
     },
+    ...(process.env.WINDOWS_CERTIFICATE_FILE
+      ? {
+          windowsSign: {
+            certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
+            certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD,
+          },
+        }
+      : {}),
     ...(process.env.APPLE_ID
       ? {
           osxSign: {},

@@ -3,8 +3,6 @@ name: Build Windows
 on:
   workflow_call:
     secrets:
-      SIC_PAT:
-        required: true
       VITE_SENTRY_DSN:
         required: true
 

@@ -11,19 +11,16 @@ jobs:
     needs: build-deps
     uses: ./.github/workflows/build-linux.yml
     secrets:
-      SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
   build-windows:
     needs: build-deps
     uses: ./.github/workflows/build-windows.yml
     secrets:
-      SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
   build-macos:
     needs: build-deps
     uses: ./.github/workflows/build-macos.yml
     secrets:
-      SIC_PAT: ${{ secrets.SIC_PAT }}
       VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
