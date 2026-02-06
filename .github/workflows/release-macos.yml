@@ -96,7 +96,7 @@ jobs:
           mkdir -p macos-artifact
           find out/make \( -name "*.zip" -o -name "*.dmg" \) -type f | while read -r f; do
             EXT="${f##*.}"
-            mv "$f" "macos-artifact/simple-irc-client_${VERSION}${SUFFIX}_macos_arm64.${EXT}"
+            mv "$f" "macos-artifact/simple-irc-client_${VERSION}${SUFFIX}_darwin_arm64.${EXT}"
           done
 
       - name: Upload macOS artifact
