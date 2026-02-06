@@ -16,32 +16,29 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: download built deps
+      - name: Download built deps
         uses: actions/download-artifact@v6
         with:
           name: built-deps
           path: built-deps/
 
-      - name: install deps into src
+      - name: Copy deps into src
         shell: bash
-        run: |
-          cp -r built-deps/* src/
+        run: cp -r built-deps/* src/
 
-      - name: build electron
+      - name: Build electron
         run: npm run make
 
-      - name: Upload MSI artifact
+      - name: Upload raw MSI artifact
         uses: actions/upload-artifact@v6
         with:
           name: msi-raw

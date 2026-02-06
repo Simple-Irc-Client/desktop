@@ -14,10 +14,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -26,7 +24,7 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: download MSI artifact
+      - name: Download raw MSI artifact
         uses: actions/download-artifact@v6
         with:
           name: msi-raw
@@ -37,10 +35,9 @@ jobs:
           mkdir -p msi-artifact
           MSI_FILE=$(find msi-raw -name "*.msi" -type f | head -1)
           if [ -z "$MSI_FILE" ]; then
-            echo "ERROR: No MSI file found"
+            echo "No MSI file found"
             exit 1
           fi
-          echo "Found: $MSI_FILE"
           cp "$MSI_FILE" "msi-artifact/simple-irc-client_${{ steps.version.outputs.version }}_x64.msi"
 
       - name: Upload MSI artifact
@@ -54,5 +51,4 @@ jobs:
         if: ${{ inputs.publish }}
         env:
           GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
-        run: |
-          gh release upload "v${{ steps.version.outputs.version }}" msi-artifact/*.msi --clobber
+        run: gh release upload "v${{ steps.version.outputs.version }}" msi-artifact/*.msi --clobber

@@ -26,28 +26,29 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: download built deps
+      - name: Download built deps
         uses: actions/download-artifact@v6
         with:
           name: built-deps
           path: built-deps/
 
-      - name: install deps into src
-        run: |
-          cp -r built-deps/* src/
+      - name: Copy deps into src
+        run: cp -r built-deps/* src/
 
-      - name: import certificate
+      - name: Get version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Import certificate
         id: import-cert
         continue-on-error: true
         env:
@@ -55,12 +56,10 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
           if [ -z "$CERTIFICATE_P12" ]; then
-            echo "No certificate provided, skipping code signing setup"
+            echo "No certificate provided, skipping signing"
             exit 1
           fi
           printf '%s' "$CERTIFICATE_P12" | base64 --decode > certificate.p12
-          echo "P12 file size: $(wc -c < certificate.p12) bytes"
-          echo "P12 file hash: $(shasum -a 256 certificate.p12 | cut -d' ' -f1)"
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
@@ -68,7 +67,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
           rm certificate.p12
 
-      - name: build electron (signed)
+      - name: Build electron (signed)
         id: build-signed
         if: steps.import-cert.outcome == 'success'
         continue-on-error: true
@@ -78,40 +77,26 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run make
 
-      - name: clean output for unsigned retry
+      - name: Build electron (unsigned fallback)
         if: steps.build-signed.outcome != 'success'
-        run: rm -rf out/
-
-      - name: build electron (unsigned)
-        if: steps.build-signed.outcome != 'success'
-        run: npm run make
-
-      - name: Get version
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Determine signing status
-        id: signing
         run: |
+          rm -rf out/
+          npm run make
+
+      - name: Prepare macOS artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
           if [ "${{ steps.build-signed.outcome }}" = "success" ]; then
-            echo "suffix=" >> $GITHUB_OUTPUT
-            echo "signed=true" >> $GITHUB_OUTPUT
+            SUFFIX=""
           else
-            echo "suffix=_not_signed" >> $GITHUB_OUTPUT
-            echo "signed=false" >> $GITHUB_OUTPUT
+            SUFFIX="_not_signed"
           fi
 
-      - name: Rename macOS artifact
-        run: |
           mkdir -p macos-artifact
-          ZIP_FILE=$(find out/make -name "*.zip" -type f | head -1)
-          if [ -n "$ZIP_FILE" ]; then
-            cp "$ZIP_FILE" "macos-artifact/simple-irc-client_${{ steps.version.outputs.version }}${{ steps.signing.outputs.suffix }}_arm64.zip"
-          fi
-          DMG_FILE=$(find out/make -name "*.dmg" -type f | head -1)
-          if [ -n "$DMG_FILE" ]; then
-            cp "$DMG_FILE" "macos-artifact/simple-irc-client_${{ steps.version.outputs.version }}${{ steps.signing.outputs.suffix }}_arm64.dmg"
-          fi
+          for f in $(find out/make -name "*.zip" -o -name "*.dmg" 2>/dev/null); do
+            EXT="${f##*.}"
+            cp "$f" "macos-artifact/simple-irc-client_${VERSION}${SUFFIX}_arm64.${EXT}"
+          done
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v6

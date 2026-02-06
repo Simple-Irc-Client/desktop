@@ -11,35 +11,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: download built deps
+      - name: Download built deps
         uses: actions/download-artifact@v6
         with:
           name: built-deps
           path: built-deps/
 
-      - name: install deps into src
-        run: |
-          cp -r built-deps/* src/
+      - name: Copy deps into src
+        run: cp -r built-deps/* src/
 
-      - name: install Linux packaging dependencies
+      - name: Install Linux packaging dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder elfutils rpm
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
 
-      - name: build electron
+      - name: Build electron
         env:
           DEBUG: electron-installer-flatpak*
         run: npm run make
