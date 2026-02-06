@@ -67,3 +67,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
         run: |
           gh release upload "v${{ steps.version.outputs.version }}" out/make/deb/x64/*.deb --clobber
+
+      - name: Upload rpm to release
+        if: ${{ inputs.publish }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.SIC_PAT }}
+        run: |
+          gh release upload "v${{ steps.version.outputs.version }}" out/make/rpm/x64/*.rpm --clobber
