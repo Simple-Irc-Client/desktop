@@ -5,6 +5,8 @@ on:
     secrets:
       SIC_PAT:
         required: true
+      VITE_ENCRYPTION_KEY:
+        required: true
 
 jobs:
   build:
@@ -30,6 +32,8 @@ jobs:
 
       - name: Build core
         working-directory: core
+        env:
+          VITE_ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
           rm -rf package-lock.json node_modules
           npm install
@@ -37,6 +41,8 @@ jobs:
 
       - name: Build network
         working-directory: network
+        env:
+          ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
           rm -rf package-lock.json node_modules
           npm install

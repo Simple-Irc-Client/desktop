@@ -6,6 +6,7 @@ jobs:
     uses: ./.github/workflows/build-deps.yml
     secrets:
       SIC_PAT: ${{ secrets.SIC_PAT }}
+      VITE_ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
 
   build-linux:
     needs: build-deps
