@@ -107,6 +107,12 @@ jobs:
             exit 0
           fi
 
+          VERSION="${{ steps.version.outputs.version }}"
+          DMG_RENAMED="$(dirname "$DMG_FILE")/simple-irc-client_${VERSION}_darwin_arm64.dmg"
+          mv "$DMG_FILE" "$DMG_RENAMED"
+          DMG_FILE="$DMG_RENAMED"
+          echo "Renamed DMG to $DMG_FILE"
+
           # Check if a previous submission for this file already completed
           echo "Checking notarization history..."
           xcrun notarytool history "${NOTARY_ARGS[@]}" --output-format json 2>/dev/null | \
