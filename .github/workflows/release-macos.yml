@@ -7,11 +7,11 @@ on:
         required: true
       VITE_SENTRY_DSN:
         required: true
-      APPLE_ID:
+      APPLE_API_KEY_P8:
         required: false
-      APPLE_PASSWORD:
+      APPLE_API_KEY_ID:
         required: false
-      APPLE_TEAM_ID:
+      APPLE_API_ISSUER_ID:
         required: false
       CERTIFICATE_P12:
         required: false
@@ -75,10 +75,59 @@ jobs:
         timeout-minutes: 30
         env:
           OSX_SIGN: 'true'
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run make
+
+      - name: Notarize macOS build
+        id: notarize
+        if: steps.build-signed.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 30
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: |
+          if [ -z "$APPLE_API_KEY_P8" ] || [ -z "$APPLE_API_KEY_ID" ] || [ -z "$APPLE_API_ISSUER_ID" ]; then
+            echo "Notarization secrets not configured, skipping"
+            exit 0
+          fi
+
+          KEY_PATH="${RUNNER_TEMP}/AuthKey_${APPLE_API_KEY_ID}.p8"
+          echo "$APPLE_API_KEY_P8" | base64 --decode > "$KEY_PATH"
+          trap 'rm -f "$KEY_PATH"' EXIT
+
+          DMG_FILE=$(find out/make -name "*.dmg" -type f | head -1)
+          if [ -z "$DMG_FILE" ]; then
+            echo "No DMG file found, skipping notarization"
+            exit 0
+          fi
+
+          echo "Submitting $DMG_FILE for notarization..."
+          RESULT=$(xcrun notarytool submit "$DMG_FILE" \
+            --key "$KEY_PATH" \
+            --key-id "$APPLE_API_KEY_ID" \
+            --issuer "$APPLE_API_ISSUER_ID" \
+            --output-format json \
+            --wait)
+          echo "$RESULT"
+
+          STATUS=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','Unknown'))")
+          echo "Notarization status: $STATUS"
+
+          if [ "$STATUS" != "Accepted" ]; then
+            SUBMISSION_ID=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+            if [ -n "$SUBMISSION_ID" ]; then
+              echo "Fetching notarization log..."
+              xcrun notarytool log "$SUBMISSION_ID" \
+                --key "$KEY_PATH" \
+                --key-id "$APPLE_API_KEY_ID" \
+                --issuer "$APPLE_API_ISSUER_ID" || true
+            fi
+            exit 1
+          fi
+
+          echo "Stapling notarization ticket..."
+          xcrun stapler staple "$DMG_FILE"
 
       - name: Build electron (unsigned fallback)
         if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
