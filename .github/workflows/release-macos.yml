@@ -148,7 +148,10 @@ jobs:
 
           echo "Notarization did not complete after $MAX_ATTEMPTS polls ($((MAX_ATTEMPTS * POLL_INTERVAL / 60)) minutes)"
           echo "Submission $SUBMISSION_ID is still processing on Apple's servers."
-          echo "Check manually: xcrun notarytool info $SUBMISSION_ID ..."
+          echo "--- Submission info ---"
+          xcrun notarytool info "$SUBMISSION_ID" "${NOTARY_ARGS[@]}" || true
+          echo "--- Notarization log ---"
+          xcrun notarytool log "$SUBMISSION_ID" "${NOTARY_ARGS[@]}" || true
           exit 1
 
       - name: Build electron (unsigned fallback)
