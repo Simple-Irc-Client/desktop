@@ -75,7 +75,10 @@ jobs:
         timeout-minutes: 30
         env:
           OSX_SIGN: 'true'
-        run: npm run make
+        run: |
+          npm run make
+          APP_FILE=$(find out -name "*.app" -type d | head -1)
+          codesign --verify --deep --strict "$APP_FILE"
 
       - name: Notarize macOS build
         id: notarize
@@ -149,7 +152,7 @@ jobs:
           exit 1
 
       - name: Build electron (unsigned fallback)
-        if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
+        if: steps.build-signed.outcome != 'success'
         run: |
           rm -rf out/
           npm run make
@@ -157,7 +160,7 @@ jobs:
       - name: Prepare macOS artifact
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.import-cert.outputs.has_cert }}" = "true" ]; then
+          if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.notarize.outcome }}" = "success" ]; then
             SUFFIX=""
           else
             SUFFIX="_not_signed"
