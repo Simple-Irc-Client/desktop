@@ -40,9 +40,9 @@ const config: ForgeConfig = {
           },
         }
       : {}),
+    ...(process.env.OSX_SIGN ? { osxSign: {} } : {}),
     ...(process.env.APPLE_ID
       ? {
-          osxSign: {},
           osxNotarize: {
             appleId: process.env.APPLE_ID,
             appleIdPassword: process.env.APPLE_PASSWORD as string,
