@@ -24,6 +24,7 @@ const createWindow = () => {
     icon: path.join(__dirname, "icons", "app_icon.png"),
     webPreferences: {
       nodeIntegration: true,
+      webSecurity: true,
       preload: path.join(__dirname, "irc-network.js"), // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
     },
   });
