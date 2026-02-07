@@ -35,6 +35,7 @@ jobs:
         env:
           VITE_ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
+          echo "VITE_ENCRYPTION_KEY prefix: ${VITE_ENCRYPTION_KEY:0:3}..."
           rm -rf package-lock.json node_modules
           npm install
           npm run build
@@ -44,6 +45,7 @@ jobs:
         env:
           ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
+          echo "ENCRYPTION_KEY prefix: ${ENCRYPTION_KEY:0:3}..."
           rm -rf package-lock.json node_modules
           npm install
           npm run build
