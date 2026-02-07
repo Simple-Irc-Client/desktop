@@ -130,7 +130,7 @@ jobs:
           echo "Submission ID: $SUBMISSION_ID"
 
           # Poll for status with logging
-          MAX_ATTEMPTS=60
+          MAX_ATTEMPTS=15
           POLL_INTERVAL=60
           for i in $(seq 1 $MAX_ATTEMPTS); do
             sleep $POLL_INTERVAL
