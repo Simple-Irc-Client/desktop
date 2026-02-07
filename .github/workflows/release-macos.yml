@@ -81,7 +81,7 @@ jobs:
         id: notarize
         if: steps.build-signed.outcome == 'success'
         continue-on-error: true
-        timeout-minutes: 45
+        timeout-minutes: 65
         env:
           APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
@@ -96,39 +96,57 @@ jobs:
           echo "$APPLE_API_KEY_P8" | base64 --decode > "$KEY_PATH"
           trap 'rm -f "$KEY_PATH"' EXIT
 
+          NOTARY_ARGS=(--key "$KEY_PATH" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID")
+
           DMG_FILE=$(find out/make -name "*.dmg" -type f | head -1)
           if [ -z "$DMG_FILE" ]; then
             echo "No DMG file found, skipping notarization"
             exit 0
           fi
 
+          # Check if a previous submission for this file already completed
+          echo "Checking notarization history..."
+          xcrun notarytool history "${NOTARY_ARGS[@]}" --output-format json 2>/dev/null | \
+            python3 -c "import json,sys; [print(f'  {s[\"id\"]} status={s.get(\"status\",\"?\")} created={s.get(\"createdDate\",\"?\")}') for s in json.load(sys.stdin).get('submissionInfoList',[])]" || true
+
           echo "Submitting $DMG_FILE for notarization..."
-          RESULT=$(xcrun notarytool submit "$DMG_FILE" \
-            --key "$KEY_PATH" \
-            --key-id "$APPLE_API_KEY_ID" \
-            --issuer "$APPLE_API_ISSUER_ID" \
-            --output-format json \
-            --wait \
-            --timeout 40m)
-          echo "$RESULT"
+          SUBMIT_RESULT=$(xcrun notarytool submit "$DMG_FILE" "${NOTARY_ARGS[@]}" --output-format json --no-wait)
+          echo "$SUBMIT_RESULT"
 
-          STATUS=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','Unknown'))")
-          echo "Notarization status: $STATUS"
-
-          if [ "$STATUS" != "Accepted" ]; then
-            SUBMISSION_ID=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
-            if [ -n "$SUBMISSION_ID" ]; then
-              echo "Fetching notarization log..."
-              xcrun notarytool log "$SUBMISSION_ID" \
-                --key "$KEY_PATH" \
-                --key-id "$APPLE_API_KEY_ID" \
-                --issuer "$APPLE_API_ISSUER_ID" || true
-            fi
+          SUBMISSION_ID=$(echo "$SUBMIT_RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('id',''))")
+          if [ -z "$SUBMISSION_ID" ]; then
+            echo "Failed to get submission ID"
             exit 1
           fi
+          echo "Submission ID: $SUBMISSION_ID"
 
-          echo "Stapling notarization ticket..."
-          xcrun stapler staple "$DMG_FILE"
+          # Poll for status with logging
+          MAX_ATTEMPTS=60
+          POLL_INTERVAL=60
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            sleep $POLL_INTERVAL
+            INFO=$(xcrun notarytool info "$SUBMISSION_ID" "${NOTARY_ARGS[@]}" --output-format json 2>&1) || true
+            STATUS=$(echo "$INFO" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','Unknown'))" 2>/dev/null || echo "Unknown")
+            echo "[$(date '+%H:%M:%S')] Poll $i/$MAX_ATTEMPTS: status=$STATUS"
+
+            if [ "$STATUS" = "Accepted" ]; then
+              echo "Notarization accepted!"
+              echo "Stapling notarization ticket..."
+              xcrun stapler staple "$DMG_FILE"
+              exit 0
+            elif [ "$STATUS" = "Invalid" ] || [ "$STATUS" = "Rejected" ]; then
+              echo "Notarization failed with status: $STATUS"
+              echo "Fetching notarization log..."
+              xcrun notarytool log "$SUBMISSION_ID" "${NOTARY_ARGS[@]}" || true
+              exit 1
+            fi
+            # "In Progress" or "Unknown" — keep polling
+          done
+
+          echo "Notarization did not complete after $MAX_ATTEMPTS polls ($((MAX_ATTEMPTS * POLL_INTERVAL / 60)) minutes)"
+          echo "Submission $SUBMISSION_ID is still processing on Apple's servers."
+          echo "Check manually: xcrun notarytool info $SUBMISSION_ID ..."
+          exit 1
 
       - name: Build electron (unsigned fallback)
         if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
