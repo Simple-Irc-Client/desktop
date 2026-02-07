@@ -81,7 +81,7 @@ jobs:
         id: notarize
         if: steps.build-signed.outcome == 'success'
         continue-on-error: true
-        timeout-minutes: 30
+        timeout-minutes: 45
         env:
           APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
@@ -108,7 +108,8 @@ jobs:
             --key-id "$APPLE_API_KEY_ID" \
             --issuer "$APPLE_API_ISSUER_ID" \
             --output-format json \
-            --wait)
+            --wait \
+            --timeout 40m)
           echo "$RESULT"
 
           STATUS=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','Unknown'))")
