@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p built-deps
           cp -r core/dist/* built-deps/
-          cp network/irc-network.js built-deps/
+          cp network/irc-network.js built-deps/irc-network.cjs
 
       - name: Upload built deps
         uses: actions/upload-artifact@v6

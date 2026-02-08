@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, session } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
@@ -15,6 +15,9 @@ if (started) {
   app.quit();
 }
 
+// Load the IRC backend server in the main process (not as a preload script)
+require(path.join(__dirname, "irc-network.cjs"));
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -25,10 +28,20 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false, // preload needs Node.js APIs (net, http, ws) for the local IRC backend
+      sandbox: true,
       webSecurity: true,
-      preload: path.join(__dirname, "irc-network.js"), // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
+      preload: path.join(__dirname, "preload.cjs"),
     },
+  });
+
+  // Block navigation away from the app
+  mainWindow.webContents.on("will-navigate", (event) => {
+    event.preventDefault();
+  });
+
+  // Block popup windows
+  mainWindow.webContents.setWindowOpenHandler(() => {
+    return { action: "deny" };
   });
 
   // and load the index.html of the app.
@@ -41,7 +54,16 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", () => {
+  // Deny all permission requests (camera, mic, geolocation, etc.)
+  session.defaultSession.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      callback(false);
+    }
+  );
+
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
