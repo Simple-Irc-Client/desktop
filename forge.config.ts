@@ -120,7 +120,8 @@ const config: ForgeConfig = {
       platform,
       arch
     ) => {
-      cpSync("./src/irc-network.js", `${buildPath}/src/irc-network.js`);
+      cpSync("./src/irc-network.cjs", `${buildPath}/src/irc-network.cjs`);
+      cpSync("./src/preload.cjs", `${buildPath}/src/preload.cjs`);
     },
   },
 };

@@ -11,5 +11,5 @@ cd ..
 cd network
 npm ci
 npm run build
-mv irc-network.js ../src
+mv irc-network.js ../src/irc-network.cjs
 cd ..
