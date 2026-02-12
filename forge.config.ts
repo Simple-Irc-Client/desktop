@@ -6,6 +6,8 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
 import { MakerDMG } from "@electron-forge/maker-dmg";
+import { FusesPlugin } from "@electron-forge/plugin-fuses";
+import { FuseV1Options, FuseVersion } from "@electron/fuses";
 
 import { cpSync } from "fs";
 
@@ -110,6 +112,15 @@ const config: ForgeConfig = {
         productDescription: "Cross platform Simple Irc Client",
         productName: "Simple Irc Client",
       },
+    }),
+  ],
+  plugins: [
+    new FusesPlugin({
+      version: FuseVersion.V1,
+      [FuseV1Options.RunAsNode]: false,
+      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
   hooks: {
