@@ -44,6 +44,33 @@ const createWindow = () => {
     return { action: "deny" };
   });
 
+  // On macOS without an Edit menu, Cmd+C/V/X/A may not reach the renderer.
+  // Handle them natively via before-input-event.
+  if (process.platform === "darwin") {
+    mainWindow.webContents.on("before-input-event", (event, input) => {
+      if (input.meta && input.type === "keyDown") {
+        switch (input.key) {
+          case "c":
+            mainWindow.webContents.copy();
+            event.preventDefault();
+            break;
+          case "v":
+            mainWindow.webContents.paste();
+            event.preventDefault();
+            break;
+          case "x":
+            mainWindow.webContents.cut();
+            event.preventDefault();
+            break;
+          case "a":
+            mainWindow.webContents.selectAll();
+            event.preventDefault();
+            break;
+        }
+      }
+    });
+  }
+
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
@@ -55,10 +82,10 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", () => {
-  // Deny all permission requests (camera, mic, geolocation, etc.)
+  // Deny all permission requests except clipboard
   session.defaultSession.setPermissionRequestHandler(
     (webContents, permission, callback) => {
-      callback(false);
+      callback(permission === "clipboard-read" || permission === "clipboard-sanitized-write");
     }
   );
 
