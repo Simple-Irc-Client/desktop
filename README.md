@@ -1,11 +1,11 @@
 # Simple Irc Client
 
-[![Build](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/build.yml?logo=github&style=for-the-badge&label=build)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/release.yml?logo=github&style=for-the-badge&label=release)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/release.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/Simple-Irc-Client/desktop?color=purple&include_prereleases&logo=github&style=for-the-badge)](https://github.com/Simple-Irc-Client/desktop/releases)
-[![License](https://img.shields.io/github/license/Simple-Irc-Client/desktop?style=for-the-badge)](https://github.com/Simple-Irc-Client/desktop/blob/main/LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Simple-Irc-Client/desktop/total?color=blue&logo=github&style=for-the-badge)](https://github.com/Simple-Irc-Client/desktop/releases)
-[![Electron](https://img.shields.io/badge/electron-latest-47848F?logo=electron&logoColor=white&style=for-the-badge)](https://www.electronjs.org/)
+[![Build](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/build.yml?label=build)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/release.yml?label=release)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Simple-Irc-Client/desktop)](https://github.com/Simple-Irc-Client/desktop/releases)
+[![License](https://img.shields.io/badge/license-AGPLv3-orange)](https://github.com/Simple-Irc-Client/desktop/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/Simple-Irc-Client/desktop/total)](https://github.com/Simple-Irc-Client/desktop/releases)
+[![Electron](https://img.shields.io/badge/electron-latest-47848F)](https://www.electronjs.org/)
 
 Simple IRC Client is an open source project that provides a minimalist IRC client for users who don't need all the bells and whistles of a full-featured IRC client.
 
