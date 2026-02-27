@@ -14,8 +14,10 @@ const config: ForgeConfig = {
     appBundleId: "com.simpleircclient.desktop",
     icon: "./build/icons/icon",
     ignore: [
+      /\.env/,
       /\.github/,
       /build/,
+      /resources/,
       /core/,
       /network/,
       /built-deps/,
