@@ -7,8 +7,6 @@ import { MakerWix } from "@electron-forge/maker-wix";
 import { MakerFlatpak } from "@electron-forge/maker-flatpak";
 import { MakerDMG } from "@electron-forge/maker-dmg";
 
-import { cpSync } from "fs";
-
 const config: ForgeConfig = {
   packagerConfig: {
     appBundleId: "com.simpleircclient.desktop",
@@ -21,6 +19,10 @@ const config: ForgeConfig = {
       /core/,
       /network/,
       /built-deps/,
+      /node_modules/,
+      /src/,
+      /vite\.main\.config\.ts/,
+      /tsconfig\.json/,
       /\.gitignore/,
       /forge\.config\.js/,
       /forge\.config\.ts/,
@@ -114,18 +116,6 @@ const config: ForgeConfig = {
       },
     }),
   ],
-  hooks: {
-    packageAfterCopy: async (
-      config,
-      buildPath,
-      electronVersion,
-      platform,
-      arch
-    ) => {
-      cpSync("./src/irc-network.cjs", `${buildPath}/src/irc-network.cjs`);
-      cpSync("./src/preload.cjs", `${buildPath}/src/preload.cjs`);
-    },
-  },
 };
 
 export default config;

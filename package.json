@@ -4,12 +4,13 @@
   "version": "1.0.24",
   "description": "Simple Irc Client",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/main.cjs",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "build": "vite build --config vite.main.config.ts",
+    "start": "npm run build && electron-forge start",
+    "package": "npm run build && electron-forge package",
+    "make": "npm run build && electron-forge make",
+    "publish": "npm run build && electron-forge publish",
     "lint": "echo \"No linting configured\""
   },
   "repository": {
@@ -25,10 +26,6 @@
   "engines": {
     "node": ">=24.0.0"
   },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.1",
-    "update-electron-app": "^3.1.2"
-  },
   "devDependencies": {
     "@electron-forge/cli": "^7.11.1",
     "@electron-forge/maker-deb": "^7.11.1",
@@ -39,6 +36,9 @@
     "@electron-forge/maker-wix": "^7.11.1",
     "@electron-forge/maker-zip": "^7.11.1",
     "electron": "40.6.0",
-    "ts-node": "^10.9.2"
+    "electron-squirrel-startup": "^1.0.1",
+    "ts-node": "^10.9.2",
+    "update-electron-app": "^3.1.2",
+    "vite": "^7.3.1"
   }
 }

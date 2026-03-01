@@ -2,13 +2,11 @@ import { app, BrowserWindow, Menu, session } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
+import started from "electron-squirrel-startup";
+import { updateElectronApp } from "update-electron-app";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const require = createRequire(import.meta.url);
-
-const started = require("electron-squirrel-startup");
-const { updateElectronApp } = require("update-electron-app");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -16,6 +14,7 @@ if (started) {
 }
 
 // Load the IRC backend server in the main process (not as a preload script)
+const require = createRequire(import.meta.url);
 require(path.join(__dirname, "irc-network.cjs"));
 
 const createWindow = () => {
