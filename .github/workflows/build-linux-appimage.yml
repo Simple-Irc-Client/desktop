@@ -56,7 +56,7 @@ jobs:
           fi
 
           mkdir -p /tmp/appimage
-          mv "$APPIMAGE_FILE" "/tmp/appimage/simple-irc-client_${{ steps.version.outputs.version }}_x86_64.AppImage"
+          mv "$APPIMAGE_FILE" "/tmp/appimage/simple-irc-client-${{ steps.version.outputs.version }}-x86_64.AppImage"
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v6

@@ -82,19 +82,19 @@ jobs:
           if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.import-cert.outputs.has_cert }}" = "true" ]; then
             SUFFIX=""
           else
-            SUFFIX="_not_signed"
+            SUFFIX="-not-signed"
           fi
 
           mkdir -p windows-artifact
 
           MSI_FILE=$(find out -name "*.msi" -type f | head -1)
           if [ -n "$MSI_FILE" ]; then
-            mv "$MSI_FILE" "windows-artifact/simple-irc-client_${VERSION}${SUFFIX}_windows_x64.msi"
+            mv "$MSI_FILE" "windows-artifact/simple-irc-client-${VERSION}${SUFFIX}-windows-x64.msi"
           fi
 
           EXE_FILE=$(find out -name "*.exe" -type f | head -1)
           if [ -n "$EXE_FILE" ]; then
-            mv "$EXE_FILE" "windows-artifact/simple-irc-client_${VERSION}${SUFFIX}_windows_x64.exe"
+            mv "$EXE_FILE" "windows-artifact/simple-irc-client-${VERSION}${SUFFIX}-windows-x64.exe"
           fi
 
       - name: Clean up certificate

@@ -108,7 +108,7 @@ jobs:
           fi
 
           VERSION="${{ steps.version.outputs.version }}"
-          DMG_RENAMED="$(dirname "$DMG_FILE")/simple-irc-client_${VERSION}_darwin_arm64.dmg"
+          DMG_RENAMED="$(dirname "$DMG_FILE")/simple-irc-client-${VERSION}-darwin-arm64.dmg"
           mv "$DMG_FILE" "$DMG_RENAMED"
           DMG_FILE="$DMG_RENAMED"
           echo "Renamed DMG to $DMG_FILE"
@@ -172,13 +172,13 @@ jobs:
           if [ "${{ steps.build-signed.outcome }}" = "success" ] && [ "${{ steps.notarize.outcome }}" = "success" ]; then
             SUFFIX=""
           else
-            SUFFIX="_not_signed"
+            SUFFIX="-not-signed"
           fi
 
           mkdir -p macos-artifact
           find out/make \( -name "*.zip" -o -name "*.dmg" \) -type f | while read -r f; do
             EXT="${f##*.}"
-            mv "$f" "macos-artifact/simple-irc-client_${VERSION}${SUFFIX}_darwin_arm64.${EXT}"
+            mv "$f" "macos-artifact/simple-irc-client-${VERSION}${SUFFIX}-darwin-arm64.${EXT}"
           done
 
       - name: Upload macOS artifact
