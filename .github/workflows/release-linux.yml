@@ -50,6 +50,18 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
+      - name: Rename deb artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DEB_FILE=$(find out/make/deb/x64 -name "*.deb" -type f | head -1)
+          mv "$DEB_FILE" "$(dirname "$DEB_FILE")/simple-irc-client-${VERSION}-x86_64.deb"
+
+      - name: Rename rpm artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RPM_FILE=$(find out/make/rpm/x64 -name "*.rpm" -type f | head -1)
+          mv "$RPM_FILE" "$(dirname "$RPM_FILE")/simple-irc-client-${VERSION}-x86_64.rpm"
+
       - name: Upload deb artifact
         uses: actions/upload-artifact@v6
         with:
