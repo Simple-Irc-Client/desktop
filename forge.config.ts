@@ -77,6 +77,7 @@ const config: ForgeConfig = {
         name: "simple-irc-client",
         summary: "Cross platform Simple Irc Client",
         description: "Cross platform Simple Irc Client",
+        base: "core22",
         confinement: "strict",
         grade: "stable",
         categories: ["Network"],
