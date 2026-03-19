@@ -71,29 +71,14 @@ const config: ForgeConfig = {
       },
     }),
     new MakerSnap({
-      // snap
-      options: {
-        // https://github.com/electron/forge/blob/main/packages/maker/snap/src/Config.ts
-        name: "simple-irc-client",
-        summary: "Cross platform Simple Irc Client",
-        description: "Cross platform Simple Irc Client",
-        base: "core22",
-        confinement: "strict",
-        grade: "stable",
-        categories: ["Network"],
-        plugs: [
-          "browser-support",
-          "network",
-          "desktop",
-          "desktop-legacy",
-          "x11",
-          "wayland",
-          "home",
-          "audio-playback",
-          "pulseaudio",
-          "opengl",
-        ],
-      },
+      // snap - MakerSnap spreads this.config directly into electron-installer-snap, no options wrapper
+      // https://github.com/electron/forge/blob/main/packages/maker/snap/src/MakerSnap.ts
+      name: "simple-irc-client",
+      summary: "Cross platform Simple Irc Client",
+      description: "Cross platform Simple Irc Client",
+      confinement: "strict",
+      grade: "stable",
+      categories: ["Network"],
     }),
     new MakerDeb({
       // deb
