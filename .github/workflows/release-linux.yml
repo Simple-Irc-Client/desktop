@@ -50,7 +50,7 @@ jobs:
 
       - name: Build electron
         env:
-          DEBUG: electron-installer-flatpak*,electron-installer-snap:*
+          DEBUG: electron-installer-flatpak*,electron-installer-snap:*,@malept/flatpak-bundler
           FLATPAK_BUILDER_ALLOW_HOST: 1
         run: npm run make
 

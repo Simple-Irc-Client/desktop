@@ -95,6 +95,7 @@ const config: ForgeConfig = {
         runtimeVersion: "24.08",
         sdk: "org.freedesktop.Sdk",
         files: [],
+        modules: [],
         finishArgs: [
           "--share=ipc",
           "--socket=x11",
