@@ -42,8 +42,7 @@ jobs:
 
       - name: Build electron
         env:
-          DEBUG: electron-installer-flatpak*
-          SNAPCRAFT_BUILD_ENVIRONMENT: host
+          DEBUG: electron-installer-flatpak*,electron-installer-snap:*
         run: npm run make
 
       - name: Get version
