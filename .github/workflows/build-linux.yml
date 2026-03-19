@@ -27,14 +27,22 @@ jobs:
       - name: Copy deps into src
         run: cp -r built-deps/* src/
 
-      - name: Install Linux packaging dependencies
+      - name: Install packaging dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder elfutils rpm
+          sudo apt-get install -y elfutils rpm
+
+      - name: Install snap dependencies
+        run: sudo snap install snapcraft --classic --channel=7.x
+
+      - name: Install flatpak dependencies
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
 
       - name: Build electron
         env:
-          DEBUG: electron-installer-flatpak*
+          DEBUG: electron-installer-flatpak*,electron-installer-snap:*
+          FLATPAK_BUILDER_ALLOW_HOST: 1
         run: npm run make

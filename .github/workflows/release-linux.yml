@@ -34,15 +34,24 @@ jobs:
       - name: Copy deps into src
         run: cp -r built-deps/* src/
 
-      - name: Install Linux packaging dependencies
+      - name: Install packaging dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y elfutils rpm
-          sudo snap install snapcraft --classic --channel=7.x
+
+      - name: Install snap dependencies
+        run: sudo snap install snapcraft --classic --channel=7.x
+
+      - name: Install flatpak dependencies
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08 org.electronjs.Electron2.BaseApp//24.08
 
       - name: Build electron
         env:
           DEBUG: electron-installer-flatpak*,electron-installer-snap:*
+          FLATPAK_BUILDER_ALLOW_HOST: 1
         run: npm run make
 
       - name: Get version
@@ -67,6 +76,12 @@ jobs:
           SNAP_FILE=$(find out/make/snap/x64 -name "*.snap" -type f | head -1)
           mv "$SNAP_FILE" "$(dirname "$SNAP_FILE")/simple-irc-client-${VERSION}-x86_64.snap"
 
+      - name: Rename flatpak artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          FLATPAK_FILE=$(find out/make/flatpak/x64 -name "*.flatpak" -type f | head -1)
+          mv "$FLATPAK_FILE" "$(dirname "$FLATPAK_FILE")/simple-irc-client-${VERSION}-x86_64.flatpak"
+
       - name: Upload deb artifact
         uses: actions/upload-artifact@v6
         with:
@@ -84,4 +99,5 @@ jobs:
             out/make/deb/x64/*.deb \
             out/make/rpm/x64/*.rpm \
             out/make/snap/x64/*.snap \
+            out/make/flatpak/x64/*.flatpak \
             --clobber

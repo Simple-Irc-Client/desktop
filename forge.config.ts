@@ -4,6 +4,7 @@ import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { MakerWix } from "@electron-forge/maker-wix";
+import { MakerFlatpak } from "@electron-forge/maker-flatpak";
 import { MakerSnap } from "@electron-forge/maker-snap";
 import { MakerDMG } from "@electron-forge/maker-dmg";
 
@@ -78,6 +79,30 @@ const config: ForgeConfig = {
       description: "Cross platform Simple Irc Client",
       confinement: "strict",
       grade: "stable",
+    }),
+    new MakerFlatpak({
+      // flatpak
+      // https://github.com/electron/forge/blob/main/packages/maker/flatpak/src/MakerFlatpak.ts
+      options: {
+        id: "com.simpleircclient.desktop",
+        productName: "Simple Irc Client",
+        description: "Cross platform Simple Irc Client",
+        categories: ["Network"],
+        icon: "./build/icons/icon.png",
+        base: "org.electronjs.Electron2.BaseApp",
+        baseVersion: "24.08",
+        runtime: "org.freedesktop.Platform",
+        runtimeVersion: "24.08",
+        sdk: "org.freedesktop.Sdk",
+        files: [],
+        finishArgs: [
+          "--share=ipc",
+          "--socket=x11",
+          "--socket=wayland",
+          "--share=network",
+          "--device=dri",
+        ],
+      },
     }),
     new MakerDeb({
       // deb
