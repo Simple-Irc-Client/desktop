@@ -79,7 +79,7 @@ jobs:
       - name: Rename flatpak artifact
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          FLATPAK_FILE=$(find out/make/flatpak/x64 -name "*.flatpak" -type f | head -1)
+          FLATPAK_FILE=$(find out/make/flatpak/x86_64 -name "*.flatpak" -type f | head -1)
           mv "$FLATPAK_FILE" "$(dirname "$FLATPAK_FILE")/simple-irc-client-${VERSION}-x86_64.flatpak"
 
       - name: Upload deb artifact
@@ -99,5 +99,5 @@ jobs:
             out/make/deb/x64/*.deb \
             out/make/rpm/x64/*.rpm \
             out/make/snap/x64/*.snap \
-            out/make/flatpak/x64/*.flatpak \
+            out/make/flatpak/x86_64/*.flatpak \
             --clobber
