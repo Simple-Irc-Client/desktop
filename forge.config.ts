@@ -78,7 +78,6 @@ const config: ForgeConfig = {
       description: "Cross platform Simple Irc Client",
       confinement: "strict",
       grade: "stable",
-      categories: ["Network"],
     }),
     new MakerDeb({
       // deb
