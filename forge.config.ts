@@ -88,7 +88,12 @@ const config: ForgeConfig = {
         productName: "Simple Irc Client",
         description: "Cross platform Simple Irc Client",
         categories: ["Network"],
-        icon: "./build/icons/icon.png",
+        // Object form places icons under share/icons/hicolor/ which flatpak exports properly.
+        // The underlying electron-installer-common supports this, but the type definition is too narrow.
+        icon: {
+          "128x128": "./build/icons/128x128.png",
+          "256x256": "./build/icons/256x256.png",
+        } as unknown as string,
         base: "org.electronjs.Electron2.BaseApp",
         baseVersion: "24.08",
         runtime: "org.freedesktop.Platform",
