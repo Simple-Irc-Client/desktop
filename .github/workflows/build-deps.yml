@@ -12,6 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -36,9 +37,9 @@ jobs:
           VITE_ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
           echo "VITE_ENCRYPTION_KEY prefix: ${VITE_ENCRYPTION_KEY:0:3}..."
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
+          rm -rf pnpm-lock.yaml node_modules
+          pnpm install
+          pnpm run build
 
       - name: Build network
         working-directory: network
@@ -46,9 +47,9 @@ jobs:
           ENCRYPTION_KEY: ${{ secrets.VITE_ENCRYPTION_KEY }}
         run: |
           echo "ENCRYPTION_KEY prefix: ${ENCRYPTION_KEY:0:3}..."
-          rm -rf package-lock.json node_modules
-          npm install
-          npm run build
+          rm -rf pnpm-lock.yaml node_modules
+          pnpm install
+          pnpm run build
 
       - name: Prepare artifact
         run: |
