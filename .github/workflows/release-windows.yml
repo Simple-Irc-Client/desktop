@@ -39,6 +39,13 @@ jobs:
         shell: bash
         run: cp -r built-deps/* src/
 
+      - name: ClamAV scan
+        shell: bash
+        run: |
+          choco install clamav -y --no-progress > /dev/null
+          freshclam --quiet
+          clamscan --recursive --infected --alert-broken src/ node_modules/
+
       - name: Get version
         id: version
         shell: bash
