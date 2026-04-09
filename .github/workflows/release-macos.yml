@@ -36,9 +36,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Rebuild native modules
-        run: pnpm rebuild
-
       - name: Download built deps
         uses: actions/download-artifact@v6
         with:
