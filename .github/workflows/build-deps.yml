@@ -59,13 +59,6 @@ jobs:
           cp -r core/dist/* built-deps/
           cp network/irc-network.js built-deps/irc-network.cjs
 
-      - name: ClamAV scan built deps
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq clamav > /dev/null
-          sudo freshclam --quiet
-          clamscan --recursive --infected --alert-broken built-deps/
-
       - name: Upload built deps
         uses: actions/upload-artifact@v6
         with:

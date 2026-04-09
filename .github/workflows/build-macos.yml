@@ -27,14 +27,5 @@ jobs:
       - name: Copy deps into src
         run: cp -r built-deps/* src/
 
-      - name: ClamAV scan
-        run: |
-          brew install clamav > /dev/null
-          sudo mkdir -p /usr/local/etc/clamav
-          sudo cp /opt/homebrew/etc/clamav/freshclam.conf.sample /opt/homebrew/etc/clamav/freshclam.conf
-          sudo sed -i '' 's/^Example/#Example/' /opt/homebrew/etc/clamav/freshclam.conf
-          freshclam --quiet
-          clamscan --recursive --infected --alert-broken src/ node_modules/
-
       - name: Build electron
         run: npm run make

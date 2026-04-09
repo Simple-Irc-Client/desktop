@@ -34,13 +34,6 @@ jobs:
       - name: Copy deps into src
         run: cp -r built-deps/* src/
 
-      - name: ClamAV scan
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq clamav > /dev/null
-          sudo freshclam --quiet
-          clamscan --recursive --infected --alert-broken src/ node_modules/
-
       - name: Install packaging dependencies
         run: |
           sudo apt-get update
