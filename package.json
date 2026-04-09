@@ -22,7 +22,6 @@
     "email": "piotr.luczko@gmail.com"
   },
   "license": "AGPL-3.0-or-later",
-  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=24.0.0"
   },

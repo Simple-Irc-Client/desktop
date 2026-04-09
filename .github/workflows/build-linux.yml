@@ -11,13 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Download built deps
         uses: actions/download-artifact@v6
@@ -46,4 +45,4 @@ jobs:
         env:
           DEBUG: electron-installer-flatpak*,electron-installer-snap:*,@malept/flatpak-bundler
           FLATPAK_BUILDER_ALLOW_HOST: 1
-        run: pnpm run make
+        run: npm run make
