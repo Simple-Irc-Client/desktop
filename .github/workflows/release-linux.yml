@@ -56,7 +56,10 @@ jobs:
         run: pnpm run make
 
       - name: Smoke-test packaged app
-        run: xvfb-run --auto-servernum node scripts/smoke-test.js out/simple-irc-client-linux-x64/simple-irc-client
+        run: |
+          sudo chown root:root out/simple-irc-client-linux-x64/chrome-sandbox
+          sudo chmod 4755 out/simple-irc-client-linux-x64/chrome-sandbox
+          xvfb-run --auto-servernum node scripts/smoke-test.js out/simple-irc-client-linux-x64/simple-irc-client
 
       - name: Get version
         id: version
