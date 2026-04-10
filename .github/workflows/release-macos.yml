@@ -28,12 +28,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Download built deps
         uses: actions/download-artifact@v6
@@ -76,7 +77,7 @@ jobs:
         env:
           OSX_SIGN: 'true'
         run: |
-          npm run make
+          pnpm run make
           APP_FILE=$(find out -name "*.app" -type d | head -1)
           codesign --verify --deep --strict "$APP_FILE"
 
@@ -164,7 +165,7 @@ jobs:
         if: steps.build-signed.outcome != 'success'
         run: |
           rm -rf out/
-          npm run make
+          pnpm run make
 
       - name: Prepare macOS artifact
         run: |

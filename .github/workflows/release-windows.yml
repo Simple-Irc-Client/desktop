@@ -22,12 +22,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Download built deps
         uses: actions/download-artifact@v6
@@ -66,14 +67,14 @@ jobs:
         env:
           WINDOWS_CERTIFICATE_FILE: ${{ env.WINDOWS_CERTIFICATE_FILE }}
           WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        run: npm run make
+        run: pnpm run make
 
       - name: Build electron (unsigned fallback)
         if: steps.import-cert.outputs.has_cert != 'true' || steps.build-signed.outcome == 'failure'
         shell: bash
         run: |
           rm -rf out/
-          npm run make
+          pnpm run make
 
       - name: Prepare Windows artifacts
         shell: bash
