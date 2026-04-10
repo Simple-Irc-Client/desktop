@@ -7,9 +7,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
+// Smoke-test mode. When the CI runner launches the packaged app with
+// SMOKE_TEST=1 in the environment, we install extra instrumentation that
+// turns the app into a self-terminating health check: any uncaught error
+// during startup fails fast, and a successful first window load exits
+// the process cleanly. In normal user runs this flag is absent and none
+// of the smoke-test code paths execute.
+//
+// The runner that drives this lives at scripts/smoke-test.js and looks
+// for two line-based sentinels on stdout/stderr:
+//   - SMOKE_TEST_READY  on stdout  -> the app started and rendered OK
+//   - SMOKE_TEST_ERROR  on stderr  -> the app crashed; runner fails fast
+// Keep those strings in sync with the runner.
 const SMOKE_TEST = process.env.SMOKE_TEST === "1";
 
 if (SMOKE_TEST) {
+  // Catch any main-process exception that would otherwise be swallowed
+  // by Electron's default handler and leave the app running in a broken
+  // state. Print the SMOKE_TEST_ERROR sentinel so the runner can fail
+  // immediately without waiting for the overall timeout.
   process.on("uncaughtException", (err) => {
     console.error("SMOKE_TEST_ERROR uncaughtException:", err?.stack || err);
     app.exit(1);
@@ -88,14 +104,30 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
   if (SMOKE_TEST) {
+    // Happy path: the renderer finished loading index.html without the
+    // main process crashing. Print the ready sentinel and then tear the
+    // app down with a short delay so any synchronous errors that fire
+    // immediately after load (e.g. during preload-bound IPC wiring)
+    // still have a chance to propagate to the uncaughtException handler
+    // before we exit 0.
     mainWindow.webContents.once("did-finish-load", () => {
       console.log("SMOKE_TEST_READY");
       setTimeout(() => app.exit(0), 500);
     });
+
+    // Fail path: the window failed to load the HTML at all (bad path,
+    // bundler output missing, etc.). did-fail-load doesn't throw, so
+    // without this listener the app would just sit there until the
+    // runner's overall timeout.
     mainWindow.webContents.once("did-fail-load", (_e, code, desc) => {
       console.error(`SMOKE_TEST_ERROR did-fail-load: ${code} ${desc}`);
       app.exit(1);
     });
+
+    // Fail path: the renderer process itself crashed (OOM, segfault,
+    // killed by the OS). This is the only signal the main process gets
+    // for a renderer crash — uncaughtException won't fire for it because
+    // the failure is out-of-process.
     mainWindow.webContents.on("render-process-gone", (_e, details) => {
       console.error(`SMOKE_TEST_ERROR render-process-gone: ${details.reason}`);
       app.exit(1);
@@ -144,6 +176,9 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
+// Skipped under SMOKE_TEST because the auto-updater hits the network to
+// check GitHub releases, which is both noisy in CI logs and irrelevant
+// to the question the smoke test is answering ("does the app start?").
 if (!SMOKE_TEST) {
   updateElectronApp();
 }
