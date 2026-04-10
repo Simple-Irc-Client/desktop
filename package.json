@@ -42,5 +42,15 @@
     "@electron-forge/maker-zip": "^7.11.1",
     "electron": "41.1.0",
     "ts-node": "^10.9.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@bitdisaster/exe-icon-extractor",
+      "electron",
+      "electron-winstaller",
+      "esbuild",
+      "fs-xattr",
+      "macos-alias"
+    ]
   }
 }
