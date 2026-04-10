@@ -7,6 +7,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
+const SMOKE_TEST = process.env.SMOKE_TEST === "1";
+
+if (SMOKE_TEST) {
+  process.on("uncaughtException", (err) => {
+    console.error("SMOKE_TEST_ERROR uncaughtException:", err?.stack || err);
+    app.exit(1);
+  });
+  process.on("unhandledRejection", (reason) => {
+    console.error("SMOKE_TEST_ERROR unhandledRejection:", reason?.stack || reason);
+    app.exit(1);
+  });
+}
+
 const started = require("electron-squirrel-startup");
 const { updateElectronApp } = require("update-electron-app");
 
@@ -74,6 +87,21 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
+  if (SMOKE_TEST) {
+    mainWindow.webContents.once("did-finish-load", () => {
+      console.log("SMOKE_TEST_READY");
+      setTimeout(() => app.exit(0), 500);
+    });
+    mainWindow.webContents.once("did-fail-load", (_e, code, desc) => {
+      console.error(`SMOKE_TEST_ERROR did-fail-load: ${code} ${desc}`);
+      app.exit(1);
+    });
+    mainWindow.webContents.on("render-process-gone", (_e, details) => {
+      console.error(`SMOKE_TEST_ERROR render-process-gone: ${details.reason}`);
+      app.exit(1);
+    });
+  }
+
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 };
@@ -116,4 +144,6 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
-updateElectronApp();
+if (!SMOKE_TEST) {
+  updateElectronApp();
+}

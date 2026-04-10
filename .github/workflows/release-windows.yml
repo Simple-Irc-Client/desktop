@@ -76,6 +76,10 @@ jobs:
           rm -rf out/
           pnpm run make
 
+      - name: Smoke-test packaged app
+        shell: bash
+        run: node scripts/smoke-test.js "out/simple-irc-client-win32-x64/simple-irc-client.exe"
+
       - name: Prepare Windows artifacts
         shell: bash
         run: |

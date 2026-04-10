@@ -55,6 +55,9 @@ jobs:
           FLATPAK_BUILDER_ALLOW_HOST: 1
         run: pnpm run make
 
+      - name: Smoke-test packaged app
+        run: xvfb-run --auto-servernum node scripts/smoke-test.js out/simple-irc-client-linux-x64/simple-irc-client
+
       - name: Get version
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT

@@ -22,6 +22,7 @@ const config: ForgeConfig = {
       /core/,
       /network/,
       /built-deps/,
+      /scripts/,
       /\.gitignore/,
       /forge\.config\.js/,
       /forge\.config\.ts/,

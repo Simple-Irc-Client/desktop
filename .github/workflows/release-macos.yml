@@ -167,6 +167,15 @@ jobs:
           rm -rf out/
           pnpm run make
 
+      - name: Smoke-test packaged app
+        run: |
+          APP_BIN=$(find out -type f -path "*/Contents/MacOS/*" ! -name "*.dylib" | head -1)
+          if [ -z "$APP_BIN" ]; then
+            echo "No packaged .app binary found under out/"
+            exit 1
+          fi
+          node scripts/smoke-test.js "$APP_BIN"
+
       - name: Prepare macOS artifact
         run: |
           VERSION="${{ steps.version.outputs.version }}"
