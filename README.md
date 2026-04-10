@@ -1,6 +1,5 @@
 # Simple Irc Client
 
-[![Build](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/build.yml?label=build)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/actions/workflow/status/Simple-Irc-Client/desktop/release.yml?label=release)](https://github.com/Simple-Irc-Client/desktop/actions/workflows/release.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Simple-Irc-Client/desktop)](https://github.com/Simple-Irc-Client/desktop/releases)
 [![License](https://img.shields.io/badge/license-AGPLv3-orange)](https://github.com/Simple-Irc-Client/desktop/blob/main/LICENSE)
