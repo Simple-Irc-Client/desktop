@@ -176,9 +176,41 @@ app.on("activate", () => {
 Menu.setApplicationMenu(false);
 
 // updates
-// Skipped under SMOKE_TEST because the auto-updater hits the network to
-// check GitHub releases, which is both noisy in CI logs and irrelevant
-// to the question the smoke test is answering ("does the app start?").
-if (!SMOKE_TEST) {
+if (SMOKE_TEST) {
+  // Export-shape check. A renamed export, a broken destructure, or a
+  // module-shape change in update-electron-app would leave
+  // `updateElectronApp` as undefined here. Production would crash on the
+  // first call below; the smoke test used to miss it entirely because it
+  // skipped the invocation. Assert the shape explicitly so the regression
+  // surfaces in CI.
+  if (typeof updateElectronApp !== "function") {
+    console.error(
+      "SMOKE_TEST_ERROR updateElectronApp is not a function, got:",
+      typeof updateElectronApp
+    );
+    app.exit(1);
+  } else if (process.platform !== "darwin") {
+    // Actually invoke it on Windows and Linux so a synchronous init bug
+    // inside update-electron-app (bad options validation, missing repo
+    // field, etc.) also fails the smoke test.
+    //
+    // Darwin is deliberately excluded: update-electron-app's init calls
+    // autoUpdater.setFeedURL, which throws synchronously on an unsigned
+    // macOS build ("Could not get code signature for running
+    // application"). CI runs the unsigned fallback whenever the mac
+    // signing secrets are absent, so tolerating that path here is not a
+    // workaround — it's an accurate model of which builds actually have
+    // a working updater.
+    try {
+      updateElectronApp();
+    } catch (err) {
+      console.error(
+        "SMOKE_TEST_ERROR updateElectronApp threw:",
+        err?.stack || err
+      );
+      app.exit(1);
+    }
+  }
+} else {
   updateElectronApp();
 }
