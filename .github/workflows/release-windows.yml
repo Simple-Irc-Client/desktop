@@ -102,6 +102,16 @@ jobs:
             mv "$EXE_FILE" "windows-artifact/simple-irc-client-${VERSION}${SUFFIX}-win32-x64.exe"
           fi
 
+          NUPKG_FILE=$(find out -name "*-full.nupkg" -type f | head -1)
+          if [ -n "$NUPKG_FILE" ]; then
+            cp "$NUPKG_FILE" "windows-artifact/$(basename "$NUPKG_FILE")"
+          fi
+
+          RELEASES_FILE=$(find out -name "RELEASES" -type f | head -1)
+          if [ -n "$RELEASES_FILE" ]; then
+            cp "$RELEASES_FILE" "windows-artifact/RELEASES"
+          fi
+
       - name: Clean up certificate
         if: steps.import-cert.outputs.has_cert == 'true'
         shell: bash
