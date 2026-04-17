@@ -14,6 +14,12 @@ test.beforeAll(async () => {
     cwd: appRoot,
   });
   page = await electronApp.firstWindow();
+  page.on("console", (msg) => {
+    console.log(`[renderer ${msg.type()}]`, msg.text());
+  });
+  page.on("pageerror", (err) => {
+    console.log(`[renderer pageerror]`, err.message);
+  });
   await page.waitForLoadState("domcontentloaded");
 });
 
@@ -40,10 +46,34 @@ test("right-click Paste inserts clipboard at caret, does not replace input", asy
     clipboard.writeText("XXX");
   });
 
+  // Probe: is the preload bridge present in the renderer?
+  const bridgeProbe = await page.evaluate(() => {
+    const w = globalThis as unknown as { sicDesktop?: { clipboard?: { readText?: () => string } } };
+    return {
+      hasSicDesktop: !!w.sicDesktop,
+      hasClipboard: !!w.sicDesktop?.clipboard,
+      canRead: typeof w.sicDesktop?.clipboard?.readText === "function",
+      readNow: w.sicDesktop?.clipboard?.readText?.() ?? null,
+    };
+  });
+  console.log("[bridge probe]", JSON.stringify(bridgeProbe));
+
   await nick.click({ button: "right" });
 
-  // Menu label is "Paste" in en (CI runner default locale).
-  await page.getByRole("menuitem", { name: "Paste" }).click();
+  // Wait for the menu to actually appear before clicking Paste.
+  await page.locator('[role="menu"]').waitFor({ state: "visible", timeout: 5_000 });
+  const menuItems = await page.locator('[role="menuitem"]').allTextContents();
+  console.log("[menu items]", JSON.stringify(menuItems));
+
+  await page.getByRole("menuitem", { name: "Paste", exact: true }).click();
+
+  // Give the async readClipboard().then(doPaste) microtask + RAF chain time to land.
+  await page.waitForTimeout(500);
+  const probe = await page.evaluate(() => {
+    const el = document.getElementById("nick") as HTMLInputElement | null;
+    return { value: el?.value ?? null, activeId: document.activeElement?.id ?? null };
+  });
+  console.log("[post-paste probe]", JSON.stringify(probe));
 
   await expect(nick).toHaveValue("heXXXllo");
 });
