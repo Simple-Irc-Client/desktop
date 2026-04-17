@@ -91,6 +91,10 @@ typings/
 # Electron-Forge
 out/
 
+# Playwright
+playwright-report/
+test-results/
+
 # SIC
 core
 network
