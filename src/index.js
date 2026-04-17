@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, session } from "electron";
+import { app, BrowserWindow, Menu, clipboard, ipcMain, session } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
@@ -46,6 +46,17 @@ if (started) {
 
 // Load the IRC backend server in the main process (not as a preload script)
 require(path.join(__dirname, "irc-network.cjs"));
+
+// Clipboard bridge for the sandboxed renderer. The preload runs with
+// sandbox: true, which restricts require("electron") to a small whitelist
+// (contextBridge, ipcRenderer, webFrame, webUtils) — clipboard is not in
+// it, so the preload cannot touch the system pasteboard directly. Route
+// reads/writes through IPC to the main process where the clipboard module
+// is available.
+ipcMain.handle("sic:clipboard:read", () => clipboard.readText());
+ipcMain.on("sic:clipboard:write", (_event, text) => {
+  clipboard.writeText(typeof text === "string" ? text : "");
+});
 
 const createWindow = () => {
   // Create the browser window.

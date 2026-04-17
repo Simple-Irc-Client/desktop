@@ -1,9 +1,9 @@
-const { contextBridge, clipboard } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("sicDesktop", {
   platform: process.platform,
   clipboard: {
-    readText: () => clipboard.readText(),
-    writeText: (text) => clipboard.writeText(text),
+    readText: () => ipcRenderer.invoke("sic:clipboard:read"),
+    writeText: (text) => ipcRenderer.send("sic:clipboard:write", text),
   },
 });
