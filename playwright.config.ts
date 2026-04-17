@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    trace: "on",
-    screenshot: "on",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
   },
 });
