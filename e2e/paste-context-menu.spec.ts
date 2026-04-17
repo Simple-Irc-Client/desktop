@@ -48,12 +48,21 @@ test("right-click Paste inserts clipboard at caret, does not replace input", asy
 
   // Probe: is the preload bridge present in the renderer?
   const bridgeProbe = await page.evaluate(() => {
-    const w = globalThis as unknown as { sicDesktop?: { clipboard?: { readText?: () => string } } };
+    const w = globalThis as unknown as Record<string, unknown>;
+    const sd = w.sicDesktop as Record<string, unknown> | undefined;
+    const cb = sd ? (sd.clipboard as Record<string, unknown> | undefined) : undefined;
+    const rt = cb ? (cb.readText as (() => string) | undefined) : undefined;
+    let readNow: string | null = null;
+    let readErr: string | null = null;
+    if (typeof rt === "function") {
+      try { readNow = rt(); } catch (e) { readErr = String(e); }
+    }
     return {
-      hasSicDesktop: !!w.sicDesktop,
-      hasClipboard: !!w.sicDesktop?.clipboard,
-      canRead: typeof w.sicDesktop?.clipboard?.readText === "function",
-      readNow: w.sicDesktop?.clipboard?.readText?.() ?? null,
+      hasSicDesktop: !!sd,
+      hasClipboard: !!cb,
+      canRead: typeof rt === "function",
+      readNow,
+      readErr,
     };
   });
   console.log("[bridge probe]", JSON.stringify(bridgeProbe));
