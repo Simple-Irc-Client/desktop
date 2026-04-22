@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, clipboard, ipcMain, session } from "electron";
+import { app, BrowserWindow, Menu, clipboard, ipcMain, session, shell } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
@@ -79,8 +79,21 @@ const createWindow = () => {
     event.preventDefault();
   });
 
-  // Block popup windows
-  mainWindow.webContents.setWindowOpenHandler(() => {
+  // Route window.open / target="_blank" clicks to the user's default browser.
+  // We never want Electron to spawn its own window (no in-app navigation), but
+  // without this the renderer's "open URL" actions are silently dropped.
+  // Validate the protocol here — shell.openExternal will otherwise launch
+  // arbitrary schemes (file:, javascript:, custom protocol handlers) which is
+  // an RCE vector if a malicious IRC message crafts such a URL.
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    try {
+      const { protocol } = new URL(url);
+      if (protocol === "http:" || protocol === "https:") {
+        shell.openExternal(url);
+      }
+    } catch {
+      // Invalid URL — drop it.
+    }
     return { action: "deny" };
   });
 
