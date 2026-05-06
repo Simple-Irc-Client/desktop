@@ -1,7 +1,7 @@
 {
   "name": "simple-irc-client",
   "productName": "simple-irc-client",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Simple Irc Client",
   "type": "module",
   "main": "src/index.js",
@@ -10,6 +10,9 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "lint": "echo \"No linting configured\"",
     "e2e": "playwright test"
   },
@@ -28,6 +31,9 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-opener": "^2.5.4",
     "electron-squirrel-startup": "^1.0.1",
     "update-electron-app": "^3.1.2"
   },
@@ -42,6 +48,7 @@
     "@electron-forge/maker-wix": "^7.11.1",
     "@electron-forge/maker-zip": "^7.11.1",
     "@playwright/test": "^1.50.0",
+    "@tauri-apps/cli": "^2.11.1",
     "electron": "41.1.0",
     "ts-node": "^10.9.2"
   },

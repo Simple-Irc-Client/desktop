@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Simple Irc Client",
+  "version": "1.1.2",
+  "identifier": "com.simpleircclient.desktop",
+  "build": {
+    "frontendDist": "../../core/dist",
+    "devUrl": "http://localhost:5173"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Simple Irc Client",
+        "width": 1024,
+        "height": 768,
+        "resizable": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' data: blob: asset: http://asset.localhost; font-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["msi", "nsis", "deb", "rpm", "appimage", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "InternetAndNetwork",
+    "shortDescription": "Simple Irc Client",
+    "longDescription": "A simple, modern IRC client.",
+    "linux": {
+      "deb": {
+        "section": "comm"
+      }
+    }
+  }
+}
