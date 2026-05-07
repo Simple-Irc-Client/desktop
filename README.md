@@ -12,7 +12,23 @@ Simple IRC Client is an open source project that provides a minimalist IRC clien
 
 ## Download
 
-Latest release can be downloaded from [here](https://github.com/Simple-Irc-Client/desktop/releases)
+Latest release can be downloaded from [here](https://github.com/Simple-Irc-Client/desktop/releases).
+
+### System requirements
+
+- **Windows** — Windows 10 or later. The installer ships the WebView2 runtime if it isn't already present.
+- **macOS** — macOS 12 (Monterey) or later. Uses the system WKWebView; nothing to install.
+- **Linux** — `libwebkit2gtk-4.1-0` is required. It's preinstalled on Ubuntu 24.04+, Debian 12+, Fedora 40+, and Arch. On Ubuntu 22.04 install it from universe:
+
+  ```bash
+  sudo apt install libwebkit2gtk-4.1-0
+  ```
+
+  On Fedora-based distros:
+
+  ```bash
+  sudo dnf install webkit2gtk4.1
+  ```
 
 ## Building from source
 

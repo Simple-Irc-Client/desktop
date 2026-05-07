@@ -39,6 +39,9 @@
         "section": "comm"
       }
     },
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    },
     "createUpdaterArtifacts": true
   },
   "plugins": {
