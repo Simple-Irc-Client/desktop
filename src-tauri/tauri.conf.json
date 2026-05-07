@@ -38,6 +38,15 @@
       "deb": {
         "section": "comm"
       }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Simple-Irc-Client/desktop/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENFMzVEMUU0NEMxOTFFQTAKUldTZ0hobE01TkUxenZncEt4bUgweldLaTdxYjhSRHZ3UW50SkhRTmNnTXN2U2pWbDVEaU8zMkYK"
     }
   }
 }

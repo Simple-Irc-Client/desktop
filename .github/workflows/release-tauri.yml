@@ -1,23 +1,19 @@
-name: Build Tauri
+name: Release Tauri
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "src-tauri/**"
-      - "scripts/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/build-tauri.yml"
-  pull_request:
-    branches: [main]
+    tags:
+      - "v*"
   workflow_dispatch:
-
-env:
-  CARGO_TERM_COLOR: always
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.2.0)"
+        required: true
 
 jobs:
-  build:
+  release:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -85,8 +81,7 @@ jobs:
             libxdo-dev \
             libssl-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev \
-            xvfb
+            librsvg2-dev
 
       - name: Install core dependencies
         working-directory: core
@@ -102,35 +97,27 @@ jobs:
         working-directory: desktop
         run: pnpm install --frozen-lockfile
 
-      - name: Build Tauri bundle
-        working-directory: desktop
-        shell: bash
+      - name: Build, sign and publish via tauri-action
+        uses: tauri-apps/tauri-action@v0
         env:
-          # Both secrets are optional — when unset, the build skips updater
-          # signature artifacts. The release workflow always provides them;
-          # PR builds (especially from forks) won't.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-            echo "::notice::TAURI_SIGNING_PRIVATE_KEY missing — building without updater artifacts"
-            pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
-          else
-            pnpm tauri build
-          fi
-
-      - name: Smoke test (Linux only)
-        if: matrix.target == 'linux'
-        working-directory: desktop
-        run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" \
-            node scripts/smoke-test.js src-tauri/target/release/simple-irc-client
-
-      - name: Upload bundle artifacts
-        uses: actions/upload-artifact@v6
+          # macOS code-signing + notarization. Optional; when unset macOS
+          # bundles are built unsigned and notarization is skipped.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          name: tauri-bundles-${{ matrix.target }}
-          path: |
-            desktop/src-tauri/target/release/bundle/**/*
-          if-no-files-found: error
-          retention-days: 7
+          projectPath: desktop
+          tagName: ${{ github.event.inputs.tag || github.ref_name }}
+          releaseName: "Simple Irc Client ${{ github.event.inputs.tag || github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+          # tauri-action also generates latest.json with per-platform
+          # signature pairs and uploads it as a release asset, which is
+          # what tauri-plugin-updater's endpoint resolves to.
+          updaterJsonPreferNsis: true
