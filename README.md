@@ -72,6 +72,20 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 CI publishes signed bundles automatically on tag pushes via `release-tauri.yml`.
 
+### macOS code signing & notarization
+
+`release-tauri.yml` reuses the same five GitHub secrets that the previous Electron release workflow used. As long as they're set on the repo, the macOS build is signed and notarized automatically; when they're absent, an unsigned `.dmg` is produced instead.
+
+| Secret | What it is |
+|---|---|
+| `CERTIFICATE_P12` | Base64 of the "Developer ID Application" `.p12` (cert + private key) |
+| `CERTIFICATE_PASSWORD` | Password set when the `.p12` was exported |
+| `APPLE_API_KEY_P8` | Base64 of the App Store Connect API `.p8` key file |
+| `APPLE_API_KEY_ID` | 10-character Key ID for that `.p8` |
+| `APPLE_API_ISSUER_ID` | Issuer UUID from App Store Connect → Users and Access → Integrations |
+
+The workflow decodes `APPLE_API_KEY_P8` to a temp file at runtime and maps the rest into `tauri-action`'s expected env names (`APPLE_CERTIFICATE`, `APPLE_API_KEY`, `APPLE_API_ISSUER`, etc.) — no rename is needed in the GitHub Secrets UI.
+
 ## Contributing
 
 If you find a bug or would like to contribute to the project, please open an issue or submit a pull request on GitHub.

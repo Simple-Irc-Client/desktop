@@ -97,20 +97,41 @@ jobs:
         working-directory: desktop
         run: pnpm install --frozen-lockfile
 
+      # Reuse the macOS notarization secrets that the previous Electron
+      # release workflow was already using. APPLE_API_KEY_P8 holds the
+      # base64-encoded .p8 — decode it to a file path tauri-action expects.
+      # When the secret is unset, skip silently and tauri-action will
+      # produce a signed-but-not-notarized build.
+      - name: Stage Apple notarization key
+        if: matrix.target == 'macos'
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        shell: bash
+        run: |
+          if [ -z "$APPLE_API_KEY_P8" ]; then
+            echo "APPLE_API_KEY_P8 not set, skipping notarization key staging"
+            exit 0
+          fi
+          KEY_PATH="${RUNNER_TEMP}/AuthKey.p8"
+          printf '%s' "$APPLE_API_KEY_P8" | base64 --decode > "$KEY_PATH"
+          echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
       - name: Build, sign and publish via tauri-action
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Updater bundle signing (Ed25519, separate from Apple signing).
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # macOS code-signing + notarization. Optional; when unset macOS
-          # bundles are built unsigned and notarization is skipped.
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # macOS code-signing — reuses the existing CERTIFICATE_P12 /
+          # CERTIFICATE_PASSWORD secrets from the prior Electron workflow.
+          APPLE_CERTIFICATE: ${{ secrets.CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          # macOS notarization via App Store Connect API key — reuses the
+          # existing APPLE_API_KEY_ID / APPLE_API_ISSUER_ID secrets. The
+          # .p8 file is staged by the previous step into APPLE_API_KEY_PATH.
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER_ID }}
         with:
           projectPath: desktop
           tagName: ${{ github.event.inputs.tag || github.ref_name }}
