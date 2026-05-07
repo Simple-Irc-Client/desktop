@@ -3326,7 +3326,7 @@ checksum = "703d5c7ef118737c72f1af64ad2f6f8c5e1921f818cdcb97b8fe6fc69bf66214"
 
 [[package]]
 name = "simple-irc-client"
-version = "1.1.2"
+version = "1.2.0"
 dependencies = [
  "serde",
  "serde_json",

@@ -1,11 +1,11 @@
-// CI smoke test for the packaged Electron app.
+// CI smoke test for the packaged Tauri app.
 //
 // How it works:
 //   1. Spawn the packaged binary with SMOKE_TEST=1 in the environment.
-//   2. The main process (src/index.js) sees that flag and installs
-//      uncaught-exception / renderer-crash handlers, waits for the
-//      BrowserWindow's did-finish-load, prints SMOKE_TEST_READY on stdout,
-//      and cleanly exits 0.
+//   2. The Tauri shell (src-tauri/src/lib.rs) sees that flag and installs
+//      a panic hook that prints SMOKE_TEST_ERROR on stderr, plus a page-load
+//      callback that prints SMOKE_TEST_READY on stdout once the webview's
+//      first navigation finishes, then cleanly exits 0.
 //   3. This runner watches the child's output. It passes if and only if
 //      the ready sentinel was observed AND the process closed cleanly.
 //   4. Any of the following count as a failure: an error sentinel on
@@ -13,9 +13,9 @@
 //      a failed spawn, or an overall timeout.
 //
 // The protocol is line-based sentinels rather than regex-matching on
-// stderr because Chromium and GTK produce a lot of noisy warnings under
-// CI (missing D-Bus, dconf, XPC services, etc.) that are NOT failures —
-// matching on "error" or "fatal" would cause false positives.
+// stderr because WebKitGTK / Wayland / D-Bus produce a lot of noisy
+// warnings under CI that are NOT failures — matching on "error" or "fatal"
+// would cause false positives.
 
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -26,8 +26,8 @@ import { resolve } from "node:path";
 // so this is intentionally generous.
 const TIMEOUT_MS = 60_000;
 
-// Sentinels exchanged with the instrumented main process.
-// Keep these in sync with src/index.js.
+// Sentinels exchanged with the instrumented Tauri shell.
+// Keep these in sync with src-tauri/src/lib.rs.
 const READY_SENTINEL = "SMOKE_TEST_READY";
 const ERROR_SENTINEL = "SMOKE_TEST_ERROR";
 
@@ -49,9 +49,9 @@ console.log(`Smoke testing: ${binaryPath}`);
 
 // ---------- spawn the app ----------
 
-// SMOKE_TEST=1 flips src/index.js into test mode. stdin is ignored because
-// the app doesn't read from it; stdout/stderr are piped so we can stream
-// them through and scan for sentinels at the same time.
+// SMOKE_TEST=1 flips lib.rs into test mode. stdin is ignored because the
+// app doesn't read from it; stdout/stderr are piped so we can stream them
+// through and scan for sentinels at the same time.
 const child = spawn(binaryPath, [], {
   env: { ...process.env, SMOKE_TEST: "1" },
   stdio: ["ignore", "pipe", "pipe"],
@@ -94,7 +94,7 @@ function finish(code, reason) {
   clearTimeout(timer);
 
   // SIGKILL is deliberate: we don't need a graceful shutdown, and on the
-  // success path app.exit(0) has already been called inside the child —
+  // success path the Tauri app has already called app_handle.exit(0) —
   // this is just insurance against a hung process.
   try {
     child.kill("SIGKILL");
@@ -127,10 +127,10 @@ child.stdout.on("data", (buf) => {
   }
 });
 
-// Stream stderr through and fail fast if the main process reports an
-// error sentinel. That path fires from uncaughtException /
-// unhandledRejection / did-fail-load / render-process-gone handlers in
-// src/index.js, so it's always a real bug worth surfacing immediately.
+// Stream stderr through and fail fast if the Tauri shell reports an
+// error sentinel. That path fires from the panic hook installed in
+// src-tauri/src/lib.rs, so it's always a real bug worth surfacing
+// immediately.
 child.stderr.on("data", (buf) => {
   const chunk = buf.toString();
   capturedStderr += chunk;
@@ -156,7 +156,7 @@ child.on("close", (code, signal) => {
   if (sawError) return;
 
   // Happy path: we saw the ready sentinel, and the process either exited
-  // 0 on its own (app.exit(0) from the instrumented main) or was killed
+  // 0 on its own (app.exit(0) from the instrumented shell) or was killed
   // by our own SIGKILL after finish() ran.
   if (sawReady && (code === 0 || signal === "SIGKILL")) {
     finish(0, `saw ${READY_SENTINEL} and exited cleanly`);
@@ -170,7 +170,7 @@ child.on("close", (code, signal) => {
     return;
   }
 
-  // Process ended before we ever saw the ready sentinel: main-process
-  // crash during startup, failed require, missing native module, etc.
+  // Process ended before we ever saw the ready sentinel: shell crash
+  // during startup, missing system library, webview failed to load, etc.
   finish(1, `exited before ${READY_SENTINEL}: code=${code} signal=${signal}`);
 });

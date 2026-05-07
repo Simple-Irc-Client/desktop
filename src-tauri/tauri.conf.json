@@ -31,7 +31,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "category": "InternetAndNetwork",
+    "category": "SocialNetworking",
     "shortDescription": "Simple Irc Client",
     "longDescription": "A simple, modern IRC client.",
     "linux": {
