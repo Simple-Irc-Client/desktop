@@ -1,6 +1,6 @@
 [package]
 name = "simple-irc-client"
-version = "1.2.0"
+version = "2.0.0"
 description = "Simple Irc Client"
 authors = ["Piotr Luczko <piotr.luczko@gmail.com>"]
 license = "AGPL-3.0-or-later"
