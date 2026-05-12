@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Simple Irc Client",
+  "productName": "Simple-Irc-Client",
   "version": "2.0.0",
   "identifier": "com.simpleircclient.desktop",
   "build": {
