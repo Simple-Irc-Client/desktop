@@ -2,7 +2,8 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use sic_irc::{Encoding, IrcClient, IrcClientOptions, IrcEvent, RegistrationOptions};
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::ipc::Channel;
+use tauri::{AppHandle, Manager, State};
 use uuid::Uuid;
 
 use super::state::{ConnectionId, IrcState};
@@ -55,6 +56,7 @@ pub async fn irc_connect(
     app: AppHandle,
     state: State<'_, IrcState>,
     options: ConnectArgs,
+    on_event: Channel<ClientEvent>,
 ) -> Result<ConnectionId, String> {
     let mut opts = IrcClientOptions::new(options.host, options.port);
     opts.tls = options.tls;
@@ -85,13 +87,20 @@ pub async fn irc_connect(
         .insert(id.clone(), client);
 
     let app_for_task = app.clone();
-    let event_name = format!("irc://{id}");
     let id_for_cleanup = id.clone();
     tokio::spawn(async move {
+        // `on_event` is created on the frontend (with its handler attached)
+        // *before* `irc_connect` is invoked, so the receiving end is live
+        // before this command — and therefore before the driver task — even
+        // starts. Anything the driver emits in the gap before this loop
+        // reaches `rx.recv()` is held in the bounded `mpsc` channel inside
+        // `IrcClient` (backpressured, never dropped). Together that closes
+        // the old race where events emitted before the renderer subscribed
+        // were lost.
         while let Some(event) = rx.recv().await {
             let is_terminal = matches!(event, IrcEvent::Closed);
             let payload: ClientEvent = event.into();
-            let _ = app_for_task.emit(&event_name, payload);
+            let _ = on_event.send(payload);
             if is_terminal {
                 break;
             }
