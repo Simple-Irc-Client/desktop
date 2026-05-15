@@ -32,7 +32,10 @@ pub struct RegistrationArgs {
 pub enum ClientEvent {
     SocketConnected,
     Connected,
-    Raw { line: String, from_server: bool },
+    // `inbound` is deliberately a single lowercase word: it serializes
+    // identically in Rust and JSON, so no field-level serde rename is needed
+    // and the snake/camel mismatch class of bug is structurally impossible.
+    Raw { line: String, inbound: bool },
     CapTimeout { retries: u32 },
     Closed,
     Error { message: String },
@@ -43,7 +46,7 @@ impl From<IrcEvent> for ClientEvent {
         match e {
             IrcEvent::SocketConnected => ClientEvent::SocketConnected,
             IrcEvent::Connected => ClientEvent::Connected,
-            IrcEvent::Raw { line, from_server } => ClientEvent::Raw { line, from_server },
+            IrcEvent::Raw { line, inbound } => ClientEvent::Raw { line, inbound },
             IrcEvent::CapTimeout { retries } => ClientEvent::CapTimeout { retries },
             IrcEvent::Closed => ClientEvent::Closed,
             IrcEvent::Error(message) => ClientEvent::Error { message },
@@ -80,11 +83,7 @@ pub async fn irc_connect(
     let (client, mut rx) = IrcClient::connect(opts);
     let id: ConnectionId = Uuid::new_v4().to_string();
 
-    state
-        .connections
-        .lock()
-        .await
-        .insert(id.clone(), client);
+    state.connections.lock().await.insert(id.clone(), client);
 
     let app_for_task = app.clone();
     let id_for_cleanup = id.clone();
@@ -144,10 +143,7 @@ pub async fn irc_quit(
 }
 
 #[tauri::command]
-pub async fn irc_disconnect(
-    state: State<'_, IrcState>,
-    id: ConnectionId,
-) -> Result<(), String> {
+pub async fn irc_disconnect(state: State<'_, IrcState>, id: ConnectionId) -> Result<(), String> {
     let client = {
         let mut conns = state.connections.lock().await;
         conns
@@ -155,4 +151,46 @@ pub async fn irc_disconnect(
             .ok_or_else(|| format!("unknown connection: {id}"))?
     };
     client.disconnect().await.map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ClientEvent;
+
+    // Locks the JS payload contract in `core/src/network/irc/tauriTransport.ts`.
+    // The field is a single lowercase word (`inbound`) precisely so Rust and
+    // JSON spell it identically; this test fails loudly if anyone reintroduces
+    // a multi-word name (and with it the snake/camel mismatch that once
+    // silently dropped every inbound line and left the app empty).
+    #[test]
+    fn raw_event_serializes_inbound_verbatim() {
+        let json = serde_json::to_string(&ClientEvent::Raw {
+            line: ":srv 001 me :hi".into(),
+            inbound: true,
+        })
+        .unwrap();
+        assert_eq!(
+            json,
+            r#"{"type":"raw","line":":srv 001 me :hi","inbound":true}"#
+        );
+    }
+
+    #[test]
+    fn variant_tags_are_camelcase() {
+        assert_eq!(
+            serde_json::to_string(&ClientEvent::SocketConnected).unwrap(),
+            r#"{"type":"socketConnected"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&ClientEvent::CapTimeout { retries: 2 }).unwrap(),
+            r#"{"type":"capTimeout","retries":2}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&ClientEvent::Error {
+                message: "boom".into()
+            })
+            .unwrap(),
+            r#"{"type":"error","message":"boom"}"#
+        );
+    }
 }
