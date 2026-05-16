@@ -43,7 +43,7 @@ Simple-Irc-Client/
 └── desktop/     # this repo — Tauri shell
 ```
 
-Prerequisites: Rust (stable), Node 24+, pnpm 10+, plus the [Tauri Linux system deps](https://v2.tauri.app/start/prerequisites/#linux) on Linux.
+Prerequisites: Rust, Node 24+, pnpm 10+, plus the [Tauri Linux system deps](https://v2.tauri.app/start/prerequisites/#linux) on Linux.
 
 ```bash
 # in core/
