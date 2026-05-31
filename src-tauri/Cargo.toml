@@ -1,0 +1,28 @@
+[package]
+name = "simple-irc-client"
+version = "2.0.0"
+description = "Simple Irc Client"
+authors = ["Piotr Luczko <piotr.luczko@gmail.com>"]
+license = "AGPL-3.0-or-later"
+edition = "2024"
+
+[lib]
+name = "simple_irc_client_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync"] }
+uuid = { version = "1", features = ["v4"] }
+sic-irc = { path = "../../network-rs" }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

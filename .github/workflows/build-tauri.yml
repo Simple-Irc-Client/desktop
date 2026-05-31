@@ -1,0 +1,136 @@
+name: Build Tauri
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src-tauri/**"
+      - "scripts/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/build-tauri.yml"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: macos
+          - os: windows-latest
+            target: windows
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout desktop
+        uses: actions/checkout@v6
+        with:
+          path: desktop
+
+      - name: Checkout core
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/core
+          token: ${{ secrets.SIC_PAT }}
+          path: core
+
+      - name: Checkout network-rs
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/network-rs
+          token: ${{ secrets.SIC_PAT }}
+          path: network-rs
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            desktop/pnpm-lock.yaml
+            core/pnpm-lock.yaml
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            desktop/src-tauri -> target
+            network-rs -> target
+
+      - name: Install Linux system deps
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libdbus-1-dev \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            xvfb
+
+      - name: Install core dependencies
+        working-directory: core
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer (core/dist)
+        working-directory: core
+        env:
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+        run: pnpm build
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri bundle
+        working-directory: desktop
+        shell: bash
+        env:
+          # Both secrets are optional — when unset, the build skips updater
+          # signature artifacts. The release workflow always provides them;
+          # PR builds (especially from forks) won't.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "::notice::TAURI_SIGNING_PRIVATE_KEY missing — building without updater artifacts"
+            pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
+          else
+            pnpm tauri build
+          fi
+
+      - name: Smoke test (Linux only)
+        if: matrix.target == 'linux'
+        working-directory: desktop
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" \
+            node scripts/smoke-test.js src-tauri/target/release/simple-irc-client
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: tauri-bundles-${{ matrix.target }}
+          path: |
+            desktop/src-tauri/target/release/bundle/**/*
+          if-no-files-found: error
+          retention-days: 7

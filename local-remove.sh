@@ -1,9 +1,6 @@
-#!/bin bash
-rm -rf core
-rm -rf network
+#!/bin/bash
+# Remove the sibling clones placed by local-create.sh.
+set -euo pipefail
 
-rm ./src/irc-network.cjs
-rm ./src/index.html
-rm ./src/favicon.ico
-rm ./src/logo.svg
-rm -rf ./src/assets
+cd "$(dirname "$0")/.."
+rm -rf core network-rs
