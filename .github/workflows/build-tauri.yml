@@ -86,6 +86,7 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
+            webkit2gtk-driver \
             xvfb
 
       - name: Install core dependencies
@@ -125,6 +126,40 @@ jobs:
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" \
             node scripts/smoke-test.js src-tauri/target/release/simple-irc-client
+
+      # THROWAWAY: post-Electron migration sanity check for the custom
+      # context-menu Paste action. Linux + Windows drive the real webview via
+      # tauri-driver + WebdriverIO; macOS uses an in-app synthetic flow via
+      # scripts/smoke-test.js --mode=paste because tauri-driver can't drive
+      # WKWebView. Remove this step (plus desktop/e2e/, the SmokeMode::Paste
+      # arm in src-tauri/src/lib.rs, the paste branch in smoke-test.js, and
+      # the @wdio/* devDeps) once the verification window closes.
+      - name: Install tauri-driver
+        if: matrix.target == 'linux' || matrix.target == 'windows'
+        run: cargo install tauri-driver --locked
+
+      - name: Context-menu paste test (Linux — tauri-driver + WDIO)
+        if: matrix.target == 'linux'
+        working-directory: desktop
+        env:
+          TAURI_APP_PATH: src-tauri/target/release/simple-irc-client
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" \
+            pnpm e2e
+
+      - name: Context-menu paste test (Windows — tauri-driver + WDIO)
+        if: matrix.target == 'windows'
+        working-directory: desktop
+        shell: bash
+        env:
+          TAURI_APP_PATH: src-tauri/target/release/simple-irc-client.exe
+        run: pnpm e2e
+
+      - name: Context-menu paste test (macOS — synthetic in-app)
+        if: matrix.target == 'macos'
+        working-directory: desktop
+        run: |
+          node scripts/smoke-test.js --mode=paste src-tauri/target/release/simple-irc-client
 
       - name: Upload bundle artifacts
         uses: actions/upload-artifact@v6
