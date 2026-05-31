@@ -3,10 +3,13 @@
 // Modes (selected via --mode=, default "ready"):
 //   ready  — verify the webview reaches first page load and exits cleanly.
 //   paste  — drive a Tauri-side round-trip of the custom context-menu Paste
-//            action (used on macOS, where tauri-driver can't drive WKWebView;
-//            Linux/Windows use the WebDriver-based test in desktop/e2e/).
-//            THROWAWAY: remove the paste branch here and in src-tauri/src/lib.rs
-//            once the Electron → Tauri migration verification window closes.
+//            action. Run on every CI OS as a single in-app synthetic flow
+//            because tauri-driver couldn't reliably drive the packaged
+//            webview from outside (msedgedriver attached to about:blank on
+//            Windows; WebKitWebDriver capabilities mismatch on Ubuntu 24.04
+//            with WebKitGTK 4.1). THROWAWAY: remove the paste branch here
+//            and in src-tauri/src/lib.rs once the Electron → Tauri migration
+//            verification window closes.
 //
 // How it works:
 //   1. Spawn the packaged binary with SMOKE_TEST=<env> in the environment

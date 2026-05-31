@@ -13,10 +13,12 @@ enum SmokeMode {
     Off,
     /// SMOKE_TEST=1 — the original ready-and-exit smoke test.
     Ready,
-    /// SMOKE_TEST=paste — context-menu paste round-trip used on macOS, where
-    /// tauri-driver can't drive WKWebView. Throwaway: delete this arm,
-    /// `sic_paste_smoke_report`, and `PASTE_TEST_JS` after the verification
-    /// window for the Electron → Tauri migration closes.
+    /// SMOKE_TEST=paste — in-app round-trip of the custom context-menu Paste
+    /// action, run on every CI OS (Linux / Windows / macOS) because
+    /// tauri-driver couldn't reliably drive the packaged webview from outside.
+    /// Throwaway: delete this arm, `sic_paste_smoke_report`, and
+    /// `PASTE_TEST_JS` after the Electron → Tauri migration verification
+    /// window closes.
     Paste,
 }
 

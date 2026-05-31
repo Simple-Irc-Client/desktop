@@ -86,7 +86,6 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
-            webkit2gtk-driver \
             xvfb
 
       - name: Install core dependencies
@@ -128,38 +127,32 @@ jobs:
             node scripts/smoke-test.js src-tauri/target/release/simple-irc-client
 
       # THROWAWAY: post-Electron migration sanity check for the custom
-      # context-menu Paste action. Linux + Windows drive the real webview via
-      # tauri-driver + WebdriverIO; macOS uses an in-app synthetic flow via
-      # scripts/smoke-test.js --mode=paste because tauri-driver can't drive
-      # WKWebView. Remove this step (plus desktop/e2e/, the SmokeMode::Paste
-      # arm in src-tauri/src/lib.rs, the paste branch in smoke-test.js, and
-      # the @wdio/* devDeps) once the verification window closes.
-      - name: Install tauri-driver
-        if: matrix.target == 'linux' || matrix.target == 'windows'
-        run: cargo install tauri-driver --locked
-
-      - name: Context-menu paste test (Linux — tauri-driver + WDIO)
+      # context-menu Paste action. Drives an in-app synthetic right-click →
+      # Paste flow inside the real Tauri webview on every OS via
+      # scripts/smoke-test.js --mode=paste. We tried hybrid WebDriver coverage
+      # via tauri-driver on Linux+Windows but hit hard integration issues
+      # (Windows: msedgedriver attached to about:blank instead of the app's
+      # WebView2; Linux: WebKitWebDriver capabilities-match failure under
+      # Ubuntu 24.04's WebKitGTK 4.1). Remove this step and the
+      # SmokeMode::Paste arm in src-tauri/src/lib.rs + the paste branch in
+      # smoke-test.js once the verification window closes.
+      - name: Context-menu paste test (Linux)
         if: matrix.target == 'linux'
         working-directory: desktop
-        env:
-          TAURI_APP_PATH: src-tauri/target/release/simple-irc-client
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" \
-            pnpm e2e
+            node scripts/smoke-test.js --mode=paste src-tauri/target/release/simple-irc-client
 
-      - name: Context-menu paste test (Windows — tauri-driver + WDIO)
+      - name: Context-menu paste test (Windows)
         if: matrix.target == 'windows'
         working-directory: desktop
         shell: bash
-        env:
-          TAURI_APP_PATH: src-tauri/target/release/simple-irc-client.exe
-        run: pnpm e2e
+        run: node scripts/smoke-test.js --mode=paste src-tauri/target/release/simple-irc-client.exe
 
-      - name: Context-menu paste test (macOS — synthetic in-app)
+      - name: Context-menu paste test (macOS)
         if: matrix.target == 'macos'
         working-directory: desktop
-        run: |
-          node scripts/smoke-test.js --mode=paste src-tauri/target/release/simple-irc-client
+        run: node scripts/smoke-test.js --mode=paste src-tauri/target/release/simple-irc-client
 
       - name: Upload bundle artifacts
         uses: actions/upload-artifact@v6

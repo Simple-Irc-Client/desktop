@@ -8,8 +8,7 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "lint": "echo \"No linting configured\"",
-    "e2e": "wdio run e2e/wdio.conf.cjs"
+    "lint": "echo \"No linting configured\""
   },
   "repository": {
     "type": "git",
@@ -32,11 +31,6 @@
     "@tauri-apps/plugin-updater": "^2.10.1"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.1",
-    "@wdio/cli": "^9.20.0",
-    "@wdio/local-runner": "^9.20.0",
-    "@wdio/mocha-framework": "^9.20.0",
-    "@wdio/spec-reporter": "^9.20.0",
-    "webdriverio": "^9.20.0"
+    "@tauri-apps/cli": "^2.11.1"
   }
 }
