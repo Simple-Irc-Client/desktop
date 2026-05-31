@@ -1,4 +1,19 @@
+# pnpm 11 requires every dependency with a postinstall build script to be
+# explicitly allowed or denied; otherwise `pnpm install` exits non-zero.
+# Everything below is brought in as a transitive dev dependency of the WDIO
+# stack added for the throwaway context-menu paste test and is *not needed*:
+#
+#   edgedriver  — downloads Microsoft Edge driver. We drive the Tauri webview
+#                 via tauri-driver, which uses the msedgedriver preinstalled
+#                 on windows-latest runners, not this npm-shipped binary.
+#   esbuild     — postinstall normally pulls a native binary, but esbuild
+#                 also ships prebuilt platform packages that pnpm picks up;
+#                 the postinstall script itself is just an integrity check.
+#   geckodriver — Firefox driver, not used.
+#
+# Set all three to false so pnpm skips their build scripts without erroring.
+# Remove this file when the e2e/ harness and its devDeps are removed.
 allowBuilds:
-  edgedriver: set this to true or false
-  esbuild: set this to true or false
-  geckodriver: set this to true or false
+  edgedriver: false
+  esbuild: false
+  geckodriver: false
