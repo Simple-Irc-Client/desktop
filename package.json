@@ -1,7 +1,7 @@
 {
   "name": "simple-irc-client",
   "productName": "simple-irc-client",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Simple Irc Client",
   "type": "module",
   "scripts": {
