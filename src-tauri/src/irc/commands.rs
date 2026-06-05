@@ -1,7 +1,5 @@
-use std::time::Duration;
-
 use serde::{Deserialize, Serialize};
-use sic_irc::{Encoding, IrcClient, IrcClientOptions, IrcEvent, RegistrationOptions};
+use sic_irc::{Encoding, IrcClient, IrcClientOptions, IrcEvent};
 use tauri::ipc::Channel;
 use tauri::{AppHandle, Manager, State};
 use uuid::Uuid;
@@ -16,27 +14,16 @@ pub struct ConnectArgs {
     #[serde(default)]
     pub tls: bool,
     pub encoding: Option<String>,
-    pub pong_timeout_secs: Option<u64>,
-    pub registration: Option<RegistrationArgs>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct RegistrationArgs {
-    pub nick: String,
-    pub username: String,
-    pub gecos: String,
 }
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum ClientEvent {
     SocketConnected,
-    Connected,
     // `inbound` is deliberately a single lowercase word: it serializes
     // identically in Rust and JSON, so no field-level serde rename is needed
     // and the snake/camel mismatch class of bug is structurally impossible.
     Raw { line: String, inbound: bool },
-    CapTimeout { retries: u32 },
     Closed,
     Error { message: String },
 }
@@ -45,9 +32,7 @@ impl From<IrcEvent> for ClientEvent {
     fn from(e: IrcEvent) -> Self {
         match e {
             IrcEvent::SocketConnected => ClientEvent::SocketConnected,
-            IrcEvent::Connected => ClientEvent::Connected,
             IrcEvent::Raw { line, inbound } => ClientEvent::Raw { line, inbound },
-            IrcEvent::CapTimeout { retries } => ClientEvent::CapTimeout { retries },
             IrcEvent::Closed => ClientEvent::Closed,
             IrcEvent::Error(message) => ClientEvent::Error { message },
         }
@@ -69,16 +54,11 @@ pub async fn irc_connect(
             _ => Encoding::Utf8,
         };
     }
-    if let Some(secs) = options.pong_timeout_secs {
-        opts.pong_timeout = Duration::from_secs(secs);
-    }
-    if let Some(reg) = options.registration {
-        opts.registration = Some(RegistrationOptions {
-            nick: reg.nick,
-            username: reg.username,
-            gecos: reg.gecos,
-        });
-    }
+    // The Rust driver is a pure byte pipe. The TypeScript kernel owns the
+    // entire IRC conversation for both the WebSocket and Tauri transports —
+    // registration (CAP LS / NICK / USER / CAP REQ / SASL / CAP END), replying
+    // to server PINGs, and connection-liveness policy. There is nothing else to
+    // configure here.
 
     let (client, mut rx) = IrcClient::connect(opts);
     let id: ConnectionId = Uuid::new_v4().to_string();
@@ -182,8 +162,8 @@ mod tests {
             r#"{"type":"socketConnected"}"#
         );
         assert_eq!(
-            serde_json::to_string(&ClientEvent::CapTimeout { retries: 2 }).unwrap(),
-            r#"{"type":"capTimeout","retries":2}"#
+            serde_json::to_string(&ClientEvent::Closed).unwrap(),
+            r#"{"type":"closed"}"#
         );
         assert_eq!(
             serde_json::to_string(&ClientEvent::Error {
