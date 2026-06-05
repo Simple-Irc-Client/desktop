@@ -20,10 +20,7 @@ pub struct ConnectArgs {
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum ClientEvent {
     SocketConnected,
-    // `inbound` is deliberately a single lowercase word: it serializes
-    // identically in Rust and JSON, so no field-level serde rename is needed
-    // and the snake/camel mismatch class of bug is structurally impossible.
-    Raw { line: String, inbound: bool },
+    Raw { line: String },
     Closed,
     Error { message: String },
 }
@@ -32,7 +29,7 @@ impl From<IrcEvent> for ClientEvent {
     fn from(e: IrcEvent) -> Self {
         match e {
             IrcEvent::SocketConnected => ClientEvent::SocketConnected,
-            IrcEvent::Raw { line, inbound } => ClientEvent::Raw { line, inbound },
+            IrcEvent::Raw { line } => ClientEvent::Raw { line },
             IrcEvent::Closed => ClientEvent::Closed,
             IrcEvent::Error(message) => ClientEvent::Error { message },
         }
@@ -138,21 +135,15 @@ mod tests {
     use super::ClientEvent;
 
     // Locks the JS payload contract in `core/src/network/irc/tauriTransport.ts`.
-    // The field is a single lowercase word (`inbound`) precisely so Rust and
-    // JSON spell it identically; this test fails loudly if anyone reintroduces
-    // a multi-word name (and with it the snake/camel mismatch that once
-    // silently dropped every inbound line and left the app empty).
+    // The driver only emits inbound lines now (no outbound echo), so a Raw event
+    // is just `{ type, line }`.
     #[test]
-    fn raw_event_serializes_inbound_verbatim() {
+    fn raw_event_serializes_to_type_and_line() {
         let json = serde_json::to_string(&ClientEvent::Raw {
             line: ":srv 001 me :hi".into(),
-            inbound: true,
         })
         .unwrap();
-        assert_eq!(
-            json,
-            r#"{"type":"raw","line":":srv 001 me :hi","inbound":true}"#
-        );
+        assert_eq!(json, r#"{"type":"raw","line":":srv 001 me :hi"}"#);
     }
 
     #[test]
