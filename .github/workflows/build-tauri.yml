@@ -127,7 +127,7 @@ jobs:
             node scripts/smoke-test.js src-tauri/target/release/simple-irc-client
 
       - name: Upload bundle artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: tauri-bundles-${{ matrix.target }}
           path: |
