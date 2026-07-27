@@ -1,5 +1,11 @@
+mod dcc;
 mod irc;
 
+use dcc::commands::{
+    dcc_close, dcc_connect, dcc_exists, dcc_listen, dcc_pick_directory, dcc_pick_file,
+    dcc_resolve_path, dcc_send_line, dcc_stat_file,
+};
+use dcc::state::DccState;
 use irc::commands::{irc_connect, irc_disconnect, irc_quit, irc_send};
 use irc::state::IrcState;
 use tauri::Manager;
@@ -31,12 +37,25 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        // Used only from Rust (the DCC file/folder pickers); the renderer never
+        // calls the dialog plugin directly, so there is no JS binding to add.
+        .plugin(tauri_plugin_dialog::init())
         .manage(IrcState::new())
+        .manage(DccState::new())
         .invoke_handler(tauri::generate_handler![
             irc_connect,
             irc_send,
             irc_quit,
             irc_disconnect,
+            dcc_listen,
+            dcc_connect,
+            dcc_send_line,
+            dcc_close,
+            dcc_resolve_path,
+            dcc_exists,
+            dcc_stat_file,
+            dcc_pick_file,
+            dcc_pick_directory,
         ]);
 
     if smoke {

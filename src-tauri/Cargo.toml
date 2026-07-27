@@ -16,6 +16,9 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = [] }
 tauri-plugin-clipboard-manager = "2"
+# Native file/folder pickers for DCC SEND and the download directory. Driven
+# from Rust only, so no matching npm package is needed.
+tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
 serde = { version = "1", features = ["derive"] }
