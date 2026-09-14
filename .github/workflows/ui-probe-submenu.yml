@@ -115,14 +115,14 @@ jobs:
           try:
               conn = sqlite3.connect(db_path)
               cur = conn.cursor()
-              cols = [r[1] for r in cur.execute("PRAGMA table_info(access)").fetchall()]                                                                                                                                                                           No changes this session
+              cols = [r[1] for r in cur.execute("PRAGMA table_info(access)").fetchall()]
               print(f"access table columns: {cols}")
 
               candidate_values = {
                   "service": "kTCCServiceAccessibility",
                   "client": cliclick_path,
-                  "client_type": 1,  # path-based client, not a bundle id
-                  "auth_value": 2,  # 2 = allowed
+                  "client_type": 1,
+                  "auth_value": 2,
                   "auth_reason": 4,
                   "auth_version": 1,
                   "flags": 0,
@@ -147,7 +147,6 @@ jobs:
               if conn is not None:
                   conn.close()
           PYEOF
-          # tccd may cache the database; nudge it to re-read. Non-fatal either way.
           killall tccd 2>/dev/null || echo "tccd restart skipped (not running under this name, or no permission)"
           echo "Accessibility grant attempt finished (best-effort)."
 
