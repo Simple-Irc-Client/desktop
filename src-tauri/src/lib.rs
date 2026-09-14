@@ -51,12 +51,22 @@ fn ui_probe_log(msg: String) {
     let _ = std::io::Write::flush(&mut std::io::stdout());
 }
 
+fn ui_probe_println(msg: &str) {
+    println!("UI_PROBE_EVENT: {msg}");
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let smoke = is_smoke_test();
     let ui_probe = is_ui_probe_test();
     if smoke {
         install_smoke_test_panic_hook();
+    }
+    if ui_probe {
+        // First checkpoint: confirms the binary reached Rust's entrypoint at
+        // all, before anything about window/webview creation can be blamed.
+        ui_probe_println("rust run() started");
     }
 
     let mut builder = tauri::Builder::default()
@@ -73,6 +83,16 @@ pub fn run() {
             ui_probe_log,
         ]);
 
+    if ui_probe {
+        // Second checkpoint: the window/webview were created and Tauri's own
+        // setup finished — narrows a hang down to page load specifically if
+        // this prints but neither checkpoint below ever does.
+        builder = builder.setup(|_app| {
+            ui_probe_println("setup() reached — window created");
+            Ok(())
+        });
+    }
+
     if smoke {
         builder = builder.on_page_load(|window, payload| {
             if matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
@@ -88,8 +108,15 @@ pub fn run() {
             }
         });
     } else if ui_probe {
-        builder = builder.on_page_load(|window, payload| {
-            if matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
+        builder = builder.on_page_load(|window, payload| match payload.event() {
+            // Third checkpoint: the webview began navigating to index.html at
+            // all — if this never prints, the window itself never asked to
+            // load anything (unlikely, but cheap to rule out).
+            tauri::webview::PageLoadEvent::Started => {
+                ui_probe_println("page-load started");
+            }
+            tauri::webview::PageLoadEvent::Finished => {
+                ui_probe_println("page-load finished");
                 let win = window.window();
                 match (win.inner_position(), win.scale_factor()) {
                     (Ok(pos), Ok(scale)) => {

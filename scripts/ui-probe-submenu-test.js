@@ -39,9 +39,13 @@ const RECT_RE = /UI_PROBE_EVENT: trigger-rect x=([\d.-]+) y=([\d.-]+) width=([\d
 const OPENED_RE = /UI_PROBE_EVENT: sub opened at (\d+)/;
 const CLOSED_RE = /UI_PROBE_EVENT: sub closed at (\d+) msOpen=(-?\d+)/;
 
-// Generous — cold start plus the settle delay the probe page itself waits
-// before reporting its trigger rect, plus our own hover-and-observe window.
-const OVERALL_TIMEOUT_MS = 45_000;
+// Generous — a first run on a fresh CI runner (unsigned debug binary, cold
+// WKWebView init, no bundle metadata) got nowhere near any of the Rust-side
+// checkpoints within 45s, so this leaves real headroom rather than guessing
+// at a tighter number. Cold start plus the settle delay the probe page
+// itself waits before reporting its trigger rect, plus our own
+// hover-and-observe window.
+const OVERALL_TIMEOUT_MS = 90_000;
 // How long to leave the pointer parked on the trigger, doing nothing else,
 // once it has opened. The original bug report described a close within
 // ~150-200ms of opening; this is generous headroom above that.
