@@ -109,6 +109,16 @@ jobs:
       - name: Run submenu repro probe
         working-directory: desktop
         run: |
-          app_binary=$(find src-tauri/target/debug/bundle/macos -name simple-irc-client -type f -perm +111 | head -n1)
-          echo "Resolved app binary: $app_binary"
+          # Find the .app by wildcard rather than guessing productName's exact
+          # casing/spelling, then take whatever single executable is inside
+          # Contents/MacOS — more robust than guessing the binary name too.
+          app_bundle=$(find src-tauri/target/debug/bundle -maxdepth 3 -name "*.app" | head -n1)
+          echo "Found app bundle: ${app_bundle:-<none>}"
+          if [ -z "$app_bundle" ]; then
+            echo "No .app bundle found — listing the bundle directory for debugging:"
+            find src-tauri/target/debug/bundle -maxdepth 4
+            exit 1
+          fi
+          app_binary=$(find "$app_bundle/Contents/MacOS" -maxdepth 1 -type f | head -n1)
+          echo "Resolved app binary: ${app_binary:-<none>}"
           node scripts/ui-probe-submenu-test.js "$app_binary"
