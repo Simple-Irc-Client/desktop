@@ -101,10 +101,13 @@ jobs:
       # WebContent/networking helper processes appear to need real bundle
       # context (Info.plist, bundle identifier) to come up at all. `--debug`
       # keeps this fast (no optimization) while still producing a proper
-      # .app through the full bundling pipeline.
+      # .app through the full bundling pipeline. targets is pinned to `app`:
+      # tauri.conf.json's default target list includes `dmg`, and building
+      # that consumed the intermediate .app without leaving a copy under
+      # bundle/macos (see run 34901628090) — we only need the .app itself.
       - name: Build Tauri bundle (debug)
         working-directory: desktop
-        run: pnpm tauri build --debug --config '{"bundle":{"createUpdaterArtifacts":false}}'
+        run: pnpm tauri build --debug --config '{"bundle":{"createUpdaterArtifacts":false,"targets":["app"]}}'
 
       - name: Run submenu repro probe
         working-directory: desktop
