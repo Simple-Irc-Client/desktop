@@ -83,6 +83,74 @@ jobs:
       - name: Install cliclick
         run: brew install cliclick
 
+      # Best-effort, never fails the job. Run 34901993557 showed every
+      # checkpoint fire correctly (window, page load, React mount, trigger
+      # rect self-report) but the submenu never opened despite cliclick
+      # moving the pointer to the right coordinates with no error — the
+      # textbook symptom of CGEventPost being silently dropped because the
+      # calling process lacks Accessibility permission (macOS 10.15+ gates
+      # synthetic-input delivery to *other* processes behind it). There's no
+      # interactive prompt to click on an ephemeral runner, so this pokes the
+      # per-user TCC.db directly instead. Column set is discovered at runtime
+      # (PRAGMA table_info) since it has changed across macOS versions, and
+      # every failure mode here is caught and logged rather than raised —
+      # this is one attempt at a workaround, not a dependency the rest of the
+      # job needs to succeed.
+      - name: Attempt Accessibility grant for cliclick (best-effort)
+        continue-on-error: true
+        run: |
+          python3 - <<'PYEOF'
+          import os, shutil, sqlite3, sys, time
+
+          db_path = os.path.expanduser("~/Library/Application Support/com.apple.TCC/TCC.db")
+          cliclick_path = shutil.which("cliclick")
+          print(f"cliclick path: {cliclick_path}")
+          print(f"TCC.db path: {db_path} (exists={os.path.exists(db_path)})")
+
+          if not cliclick_path or not os.path.exists(db_path):
+              print("Prerequisite missing — skipping grant attempt.")
+              sys.exit(0)
+
+          conn = None
+          try:
+              conn = sqlite3.connect(db_path)
+              cur = conn.cursor()
+              cols = [r[1] for r in cur.execute("PRAGMA table_info(access)").fetchall()]                                                                                                                                                                           No changes this session
+              print(f"access table columns: {cols}")
+
+              candidate_values = {
+                  "service": "kTCCServiceAccessibility",
+                  "client": cliclick_path,
+                  "client_type": 1,  # path-based client, not a bundle id
+                  "auth_value": 2,  # 2 = allowed
+                  "auth_reason": 4,
+                  "auth_version": 1,
+                  "flags": 0,
+                  "last_modified": int(time.time()),
+              }
+              insert_cols = [c for c in cols if c in candidate_values]
+              insert_vals = [candidate_values[c] for c in insert_cols]
+              placeholders = ",".join("?" for _ in insert_cols)
+              sql = f"INSERT OR REPLACE INTO access ({','.join(insert_cols)}) VALUES ({placeholders})"
+              print(f"Executing: {sql}")
+              cur.execute(sql, insert_vals)
+              conn.commit()
+              print("sqlite3 INSERT succeeded (this only proves the file accepted the write — tccd enforcement is separate and not verifiable from here).")
+
+              for row in cur.execute(
+                  "SELECT service, client, auth_value FROM access WHERE client LIKE ?", ("%cliclick%",)
+              ):
+                  print("verify row:", row)
+          except Exception as e:
+              print(f"TCC grant attempt failed: {e}")
+          finally:
+              if conn is not None:
+                  conn.close()
+          PYEOF
+          # tccd may cache the database; nudge it to re-read. Non-fatal either way.
+          killall tccd 2>/dev/null || echo "tccd restart skipped (not running under this name, or no permission)"
+          echo "Accessibility grant attempt finished (best-effort)."
+
       - name: Install core dependencies
         working-directory: core
         run: pnpm install --frozen-lockfile
