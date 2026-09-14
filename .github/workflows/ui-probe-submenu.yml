@@ -91,10 +91,24 @@ jobs:
         working-directory: core
         run: pnpm build
 
-      - name: Build Tauri binary (debug, unbundled — probe only, not a release artifact)
-        working-directory: desktop/src-tauri
-        run: cargo build
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: pnpm install --frozen-lockfile
+
+      # A bare `cargo build` binary run outside an .app bundle got a window
+      # created (setup() fired) but WKWebView never started loading anything
+      # (no page-load-started, ever) — see run 34900584565. WKWebView's
+      # WebContent/networking helper processes appear to need real bundle
+      # context (Info.plist, bundle identifier) to come up at all. `--debug`
+      # keeps this fast (no optimization) while still producing a proper
+      # .app through the full bundling pipeline.
+      - name: Build Tauri bundle (debug)
+        working-directory: desktop
+        run: pnpm tauri build --debug --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
       - name: Run submenu repro probe
         working-directory: desktop
-        run: node scripts/ui-probe-submenu-test.js src-tauri/target/debug/simple-irc-client
+        run: |
+          app_binary=$(find src-tauri/target/debug/bundle/macos -name simple-irc-client -type f -perm +111 | head -n1)
+          echo "Resolved app binary: $app_binary"
+          node scripts/ui-probe-submenu-test.js "$app_binary"
