@@ -1,0 +1,89 @@
+name: UI Probe — Submenu Repro (temporary)
+
+# TEMPORARY — see scripts/ui-probe-submenu-test.js for the full rationale.
+# Best-effort attempt to reproduce a DropdownMenuSub bug (a submenu closing
+# right after opening even though the pointer never left it) on a real
+# macOS/WKWebView build, since jsdom and Chromium-based e2e can't reproduce
+# whatever WKWebView is doing to its own pointer-event delivery. Manual
+# dispatch only — never runs on push/PR, and never fails the build (see the
+# script for why). Delete this workflow alongside the script, the temporary
+# Rust commands (get_ui_probe_mode, ui_probe_log) and core's
+# UiProbeSubmenuPage.tsx once the bug is diagnosed or ruled out.
+#
+# Known limitation: this depends on `cliclick` actually being able to move
+# the real OS pointer on the runner. If the hosted macOS runner's session
+# doesn't grant that without an Accessibility permission prompt, the probe
+# will silently look like "did not reproduce" rather than fail loudly — the
+# job log's "UI probe result" section is the thing to actually read.
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  probe:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout desktop
+        uses: actions/checkout@v6
+        with:
+          path: desktop
+
+      - name: Checkout core
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/core
+          token: ${{ secrets.SIC_PAT }}
+          path: core
+
+      - name: Checkout network-rs
+        uses: actions/checkout@v6
+        with:
+          repository: Simple-Irc-Client/network-rs
+          token: ${{ secrets.SIC_PAT }}
+          path: network-rs
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            desktop/pnpm-lock.yaml
+            core/pnpm-lock.yaml
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            desktop/src-tauri -> target
+            network-rs -> target
+
+      - name: Install cliclick
+        run: brew install cliclick
+
+      - name: Install core dependencies
+        working-directory: core
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer (core/dist)
+        working-directory: core
+        run: pnpm build
+
+      - name: Build Tauri binary (debug, unbundled — probe only, not a release artifact)
+        working-directory: desktop/src-tauri
+        run: cargo build
+
+      - name: Run submenu repro probe
+        working-directory: desktop
+        run: node scripts/ui-probe-submenu-test.js src-tauri/target/debug/simple-irc-client
