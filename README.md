@@ -12,7 +12,7 @@ Simple IRC Client is an open source project that provides a minimalist IRC clien
 
 ## Download
 
-Latest release can be downloaded from [here](https://github.com/Simple-Irc-Client/desktop/releases).
+Download the latest version from [GitHub Releases](https://github.com/Simple-Irc-Client/desktop/releases).
 
 ### System requirements
 
@@ -32,18 +32,18 @@ Latest release can be downloaded from [here](https://github.com/Simple-Irc-Clien
 
 ## Building from source
 
-The desktop app is a [Tauri v2](https://tauri.app/) shell that hosts the React renderer from [`core`](https://github.com/Simple-Irc-Client/core) and links the Rust IRC client from [`network-rs`](https://github.com/Simple-Irc-Client/network-rs).
+The desktop app is a [Tauri v2](https://tauri.app/) shell that hosts the React renderer from [`core`](https://github.com/Simple-Irc-Client/core) and links the Rust IRC transport from [`network-rs`](https://github.com/Simple-Irc-Client/network-rs). The IRC protocol itself is handled in `core`.
 
 Layout the three repos as siblings:
 
 ```
 Simple-Irc-Client/
 ├── core/        # Vite + React renderer (built to core/dist/)
-├── network-rs/  # Rust IRC protocol crate (sic-irc)
+├── network-rs/  # Rust IRC transport crate (sic-irc)
 └── desktop/     # this repo — Tauri shell
 ```
 
-Prerequisites: Rust, Node 24+, pnpm 10+, plus the [Tauri Linux system deps](https://v2.tauri.app/start/prerequisites/#linux) on Linux.
+Prerequisites: Rust, Node 24+, pnpm 11+, plus the [Tauri Linux system deps](https://v2.tauri.app/start/prerequisites/#linux) on Linux.
 
 ```bash
 # in core/
@@ -74,7 +74,7 @@ CI publishes signed bundles automatically on tag pushes via `release-tauri.yml`.
 
 ### macOS code signing & notarization
 
-`release-tauri.yml` reuses the same five GitHub secrets that the previous Electron release workflow used. As long as they're set on the repo, the macOS build is signed and notarized automatically; when they're absent, an unsigned `.dmg` is produced instead.
+When the following repository secrets are set, `release-tauri.yml` signs and notarizes the macOS build. Without them it produces an unsigned `.dmg`.
 
 | Secret | What it is |
 |---|---|
