@@ -5,20 +5,23 @@ use tokio::sync::Mutex;
 
 pub type ConnectionId = String;
 
+/// Open IRC connections by id.
+#[derive(Default)]
 pub struct IrcState {
-    pub connections: Mutex<HashMap<ConnectionId, IrcClient>>,
+    connections: Mutex<HashMap<ConnectionId, IrcClient>>,
 }
 
 impl IrcState {
-    pub fn new() -> Self {
-        Self {
-            connections: Mutex::new(HashMap::new()),
-        }
+    pub async fn insert(&self, id: ConnectionId, client: IrcClient) {
+        self.connections.lock().await.insert(id, client);
     }
-}
 
-impl Default for IrcState {
-    fn default() -> Self {
-        Self::new()
+    /// The handle is a cheap clone, so the lock isn't held while sending.
+    pub async fn get(&self, id: &str) -> Option<IrcClient> {
+        self.connections.lock().await.get(id).cloned()
+    }
+
+    pub async fn remove(&self, id: &str) -> Option<IrcClient> {
+        self.connections.lock().await.remove(id)
     }
 }
