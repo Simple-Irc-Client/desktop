@@ -29,19 +29,19 @@ jobs:
 
     steps:
       - name: Checkout desktop
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: desktop
 
       - name: Checkout core
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Simple-Irc-Client/core
           token: ${{ secrets.SIC_PAT }}
           path: core
 
       - name: Checkout network-rs
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Simple-Irc-Client/network-rs
           token: ${{ secrets.SIC_PAT }}
@@ -53,7 +53,7 @@ jobs:
           version: 11
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -117,7 +117,7 @@ jobs:
           echo "APPLE_API_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
 
       - name: Build, sign and publish via tauri-action
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Updater bundle signing (Ed25519, separate from Apple signing).
