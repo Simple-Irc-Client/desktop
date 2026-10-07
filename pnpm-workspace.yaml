@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - '@tauri-apps/plugin-updater@2.13.2'
