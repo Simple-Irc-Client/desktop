@@ -136,7 +136,7 @@ jobs:
           projectPath: desktop
           tagName: ${{ github.event.inputs.tag || github.ref_name }}
           releaseName: "Simple Irc Client ${{ github.event.inputs.tag || github.ref_name }}"
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           # tauri-action also generates latest.json with per-platform
           # signature pairs and uploads it as a release asset, which is
