@@ -6,28 +6,23 @@
 [![Downloads](https://img.shields.io/github/downloads/Simple-Irc-Client/desktop/total)](https://github.com/Simple-Irc-Client/desktop/releases)
 [![Tauri](https://img.shields.io/badge/tauri-v2-24C8DB)](https://tauri.app/)
 
-Simple IRC Client is an open source project that provides a minimalist IRC client for users who don't need all the bells and whistles of a full-featured IRC client.
+A simple IRC client for Windows, macOS and Linux. Chat on Libera.Chat, OFTC or any other IRC network, with end-to-end encrypted private messages.
+
+Don't want to install anything? Use the [web chat](https://app.simpleircclient.com/).
 
 ![App Screenshot](./screenshot.png)
 
 ## Download
 
-Download the latest version from [GitHub Releases](https://github.com/Simple-Irc-Client/desktop/releases).
+Get the latest version from [GitHub Releases](https://github.com/Simple-Irc-Client/desktop/releases). The app updates itself.
 
-### System requirements
-
-- **Windows** — Windows 10 or later. The installer ships the WebView2 runtime if it isn't already present.
-- **macOS** — macOS 12 (Monterey) or later. Uses the system WKWebView; nothing to install.
-- **Linux** — `libwebkit2gtk-4.1-0` is required. It's preinstalled on Ubuntu 24.04+, Debian 12+, Fedora 40+, and Arch. On Ubuntu 22.04 install it from universe:
+- **Windows** 10 or later
+- **macOS** 12 (Monterey) or later
+- **Linux**: needs `libwebkit2gtk-4.1-0`, already there on Ubuntu 24.04+, Debian 12+, Fedora 40+ and Arch. Elsewhere:
 
   ```bash
-  sudo apt install libwebkit2gtk-4.1-0
-  ```
-
-  On Fedora-based distros:
-
-  ```bash
-  sudo dnf install webkit2gtk4.1
+  sudo apt install libwebkit2gtk-4.1-0   # Ubuntu 22.04
+  sudo dnf install webkit2gtk4.1         # Fedora-based
   ```
 
 ## Building from source
@@ -88,13 +83,8 @@ The workflow decodes `APPLE_API_KEY_P8` to a temp file at runtime and maps the r
 
 ## Contributing
 
-If you find a bug or would like to contribute to the project, please open an issue or submit a pull request on GitHub.
+Found a bug or have an idea? [Open an issue](https://github.com/Simple-Irc-Client/desktop/issues) or send a pull request.
 
 ## License
 
-This project is licensed under the [Affero General Public License version 3 (AGPLv3)](https://github.com/Simple-Irc-Client/desktop/blob/main/LICENSE).
-
-## Authors
-
-- [Piotr Łuczko](https://www.github.com/piotrluczko)
-- [Dariusz Markowicz](https://www.github.com/dmarkowicz)
+[AGPL-3.0](LICENSE). Authors: [Piotr Łuczko](https://www.github.com/piotrluczko), [Dariusz Markowicz](https://www.github.com/dmarkowicz).

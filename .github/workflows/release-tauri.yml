@@ -91,6 +91,10 @@ jobs:
         working-directory: core
         env:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          # Uploads the renderer's source maps to Sentry; without the secret the build makes none
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: piotr-luczko-ge
+          SENTRY_PROJECT: simple-irc-client-app
         run: pnpm build
 
       - name: Install desktop dependencies
